@@ -3,39 +3,26 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Video Solutions Dashboard</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Cabinet+Grotesk:wght@500;700;800;900&display=swap" rel="stylesheet"/>
+<title>Video Solutions Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Cabinet+Grotesk:wght@500;700;800;900&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 :root{
-  --bg:#080d18;
-  --card:#0f1623;
-  --card2:#162030;
-  --border:#1c2d42;
-  --yellow:#f5c842;
-  --teal:#00d4aa;
-  --coral:#ff5f6d;
-  --purple:#b48ef7;
-  --blue:#4db8ff;
-  --orange:#ff9a3c;
-  --green:#3ddc97;
-  --text:#eef2ff;
-  --muted:#3a526b;
-  --muted2:#607d9b;
-  --fd:'Cabinet Grotesk',sans-serif;
-  --fb:'DM Sans',sans-serif;
+  --bg:#080d18; --card:#0f1623; --card2:#162030; --border:#1c2d42;
+  --yellow:#f5c842; --teal:#00d4aa; --coral:#ff5f6d; --purple:#b48ef7;
+  --blue:#4db8ff; --orange:#ff9a3c; --green:#3ddc97; --pink:#f472b6;
+  --text:#eef2ff; --muted:#3a526b; --muted2:#607d9b;
+  --fd:'Cabinet Grotesk',sans-serif; --fb:'DM Sans',sans-serif;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:14px;min-height:100vh;overflow-x:hidden}
 body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
-  background:
-    radial-gradient(ellipse 60% 40% at 10% 10%,rgba(0,212,170,.06) 0%,transparent 60%),
-    radial-gradient(ellipse 50% 40% at 90% 90%,rgba(245,200,66,.05) 0%,transparent 60%),
-    radial-gradient(ellipse 40% 30% at 60% 40%,rgba(77,184,255,.04) 0%,transparent 50%)}
+  background:radial-gradient(ellipse 60% 40% at 10% 10%,rgba(0,212,170,.06) 0%,transparent 60%),
+             radial-gradient(ellipse 50% 40% at 90% 90%,rgba(245,200,66,.05) 0%,transparent 60%),
+             radial-gradient(ellipse 40% 30% at 60% 40%,rgba(77,184,255,.04) 0%,transparent 50%)}
 
 /* ── HEADER ── */
 header{position:relative;z-index:10;padding:28px 36px 0;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px}
-.hdr-left{}
 .eyebrow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .live-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px var(--teal);animation:blink 2s infinite}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
@@ -44,49 +31,49 @@ h1{font-family:var(--fd);font-size:2.6rem;font-weight:900;line-height:1.05;margi
 h1 em{color:var(--teal);font-style:normal}
 .sub{font-size:.75rem;color:var(--muted2);padding-bottom:24px}
 .sub b{color:var(--yellow)}
-.hdr-right{display:flex;align-items:center;gap:10px;padding-top:8px}
-#refresh-btn{background:none;border:1px solid var(--border);color:var(--teal);font-family:var(--fb);font-size:.72rem;padding:8px 16px;border-radius:8px;cursor:pointer;transition:all .2s;letter-spacing:.04em}
+#refresh-btn{background:none;border:1px solid var(--border);color:var(--teal);font-family:var(--fb);font-size:.72rem;padding:8px 16px;border-radius:8px;cursor:pointer;transition:all .2s;margin-top:8px}
 #refresh-btn:hover{background:var(--teal);color:var(--bg)}
 
+/* ── TABS ── */
+.tab-bar{position:relative;z-index:5;display:flex;gap:4px;padding:0 36px;margin-bottom:0;border-bottom:1px solid var(--border)}
+.tab-btn{font-family:var(--fd);font-size:.8rem;font-weight:700;padding:12px 22px;background:none;border:none;color:var(--muted2);cursor:pointer;position:relative;transition:color .2s;letter-spacing:.04em;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--teal);border-bottom-color:var(--teal)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
 /* ── MAIN ── */
-main{position:relative;z-index:1;padding:0 36px 56px}
+main{position:relative;z-index:1;padding:24px 36px 56px}
 
 /* ── KPI STRIP ── */
 .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:18px}
+.kpi-row-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
 .kc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 20px 16px;position:relative;overflow:hidden;transition:transform .2s,border-color .2s}
 .kc:hover{transform:translateY(-2px);border-color:var(--muted)}
 .kc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;border-radius:0 0 14px 14px}
-.kc.k1::after{background:var(--yellow)}
-.kc.k2::after{background:var(--teal)}
-.kc.k3::after{background:var(--coral)}
-.kc.k4::after{background:var(--blue)}
-.kc.k5::after{background:var(--green)}
+.kc.k1::after{background:var(--yellow)}.kc.k2::after{background:var(--teal)}
+.kc.k3::after{background:var(--coral)}.kc.k4::after{background:var(--blue)}
+.kc.k5::after{background:var(--green)}.kc.k6::after{background:var(--purple)}
 .kt{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
 .kl{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);line-height:1.4}
 .ki{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
-.kc.k1 .ki{background:rgba(245,200,66,.1)}
-.kc.k2 .ki{background:rgba(0,212,170,.1)}
-.kc.k3 .ki{background:rgba(255,95,109,.1)}
-.kc.k4 .ki{background:rgba(77,184,255,.1)}
-.kc.k5 .ki{background:rgba(61,220,151,.1)}
+.kc.k1 .ki{background:rgba(245,200,66,.1)}.kc.k2 .ki{background:rgba(0,212,170,.1)}
+.kc.k3 .ki{background:rgba(255,95,109,.1)}.kc.k4 .ki{background:rgba(77,184,255,.1)}
+.kc.k5 .ki{background:rgba(61,220,151,.1)}.kc.k6 .ki{background:rgba(180,142,247,.1)}
 .kv{font-family:var(--fd);font-size:2.2rem;font-weight:900;line-height:1;margin-bottom:3px}
-.kc.k1 .kv{color:var(--yellow)}
-.kc.k2 .kv{color:var(--teal)}
-.kc.k3 .kv{color:var(--coral)}
-.kc.k4 .kv{color:var(--blue)}
-.kc.k5 .kv{color:var(--green)}
+.kc.k1 .kv{color:var(--yellow)}.kc.k2 .kv{color:var(--teal)}
+.kc.k3 .kv{color:var(--coral)}.kc.k4 .kv{color:var(--blue)}
+.kc.k5 .kv{color:var(--green)}.kc.k6 .kv{color:var(--purple)}
 .kd{font-size:.7rem;color:var(--muted2)}
 
-/* ── MEGA PROGRESS CARD ── */
+/* ── MEGA PROGRESS ── */
 .mega-prog{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin-bottom:18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px;align-items:center}
-.mp-main{}
 .mp-label{font-size:.65rem;letter-spacing:.13em;text-transform:uppercase;color:var(--muted2);margin-bottom:6px}
 .mp-title{font-family:var(--fd);font-size:1rem;font-weight:800;margin-bottom:14px}
 .prog-track{height:10px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:8px}
 .prog-fill{height:100%;border-radius:99px;transition:width 1.2s cubic-bezier(.4,0,.2,1);width:0%}
 .pf-teal{background:linear-gradient(90deg,var(--teal),#00f7c3)}
 .pf-blue{background:linear-gradient(90deg,var(--blue),#80d4ff)}
-.pf-yellow{background:linear-gradient(90deg,var(--yellow),#ffd966)}
 .prog-nums{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted2)}
 .prog-nums b{color:var(--text)}
 .mp-pct{font-family:var(--fd);font-size:3.5rem;font-weight:900;color:var(--teal);text-align:center;line-height:1}
@@ -96,26 +83,34 @@ main{position:relative;z-index:1;padding:0 36px 56px}
 .mp-stat-label{font-size:.72rem;color:var(--muted2)}
 .mp-stat-val{font-family:var(--fd);font-size:1rem;font-weight:800}
 
-/* ── CHARTS ── */
-.charts-row{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:16px;margin-bottom:18px}
+/* ── SECTION CARDS ── */
 .sc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px 24px}
 .stitle{font-family:var(--fd);font-size:1rem;font-weight:800;margin-bottom:2px}
 .ssub{font-size:.7rem;color:var(--muted2);margin-bottom:18px}
 .cw{position:relative;height:220px}
-.cw-tall{position:relative;height:250px}
+.cw-tall{position:relative;height:260px}
+.cw-xl{position:relative;height:300px}
 
-/* ── BOTTOM CHARTS ── */
+/* ── SECTION HEADER ── */
+.section-hdr{display:flex;align-items:center;gap:12px;margin:28px 0 16px}
+.section-hdr-line{flex:1;height:1px;background:var(--border)}
+.section-hdr-title{font-family:var(--fd);font-size:.75rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);white-space:nowrap;padding:0 4px}
+.section-hdr-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+
+/* ── CHARTS GRID ── */
+.charts-row{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:16px;margin-bottom:18px}
 .bot-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+.charts-row-2{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:18px}
+.full-row{margin-bottom:18px}
 
 /* ── TABLE ── */
-.tbl-sec{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.tbl-sec{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:18px}
 .tbl-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px}
 .tbl-ttl{font-family:var(--fd);font-size:.95rem;font-weight:800}
 .ctrl{display:flex;gap:8px;flex-wrap:wrap}
-select,#search{background:var(--card2);border:1px solid var(--border);color:var(--text);font-family:var(--fb);font-size:.72rem;padding:7px 11px;border-radius:8px;outline:none;cursor:pointer;transition:border-color .2s}
-select:focus,#search:focus{border-color:var(--teal)}
-#search{width:175px}
-#search::placeholder{color:var(--muted)}
+select,.sinp{background:var(--card2);border:1px solid var(--border);color:var(--text);font-family:var(--fb);font-size:.72rem;padding:7px 11px;border-radius:8px;outline:none;cursor:pointer;transition:border-color .2s}
+select:focus,.sinp:focus{border-color:var(--teal)}
+.sinp{width:175px}.sinp::placeholder{color:var(--muted)}
 .twrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:.78rem}
 thead th{padding:10px 16px;text-align:left;font-size:.61rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted2);border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none;transition:color .15s}
@@ -125,203 +120,263 @@ tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
 tbody tr:hover{background:var(--card2)}
 tbody tr:last-child{border-bottom:none}
 td{padding:11px 16px;vertical-align:middle;white-space:nowrap}
-td.wrap-cell{white-space:normal;min-width:140px}
-
-/* progress bar in table */
+td.wrap-cell{white-space:normal;min-width:130px}
 .tprog{display:flex;align-items:center;gap:8px}
-.tprog-track{flex:1;height:5px;background:var(--border);border-radius:99px;overflow:hidden;min-width:60px}
-.tprog-fill{height:100%;border-radius:99px;background:var(--teal);transition:width .6s ease}
+.tprog-track{flex:1;height:5px;background:var(--border);border-radius:99px;overflow:hidden;min-width:55px}
+.tprog-fill{height:100%;border-radius:99px;transition:width .6s ease}
 .tprog-lbl{font-size:.7rem;color:var(--muted2);white-space:nowrap;min-width:32px;text-align:right}
-
-/* badges */
 .badge{display:inline-flex;padding:3px 11px;border-radius:99px;font-size:.61rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
 .b-done,.b-complete,.b-completed,.b-closed,.b-finished{background:rgba(0,212,170,.12);color:var(--teal);border:1px solid rgba(0,212,170,.3)}
 .b-inprogress,.b-active,.b-ongoing,.b-started,.b-progress,.b-wip{background:rgba(77,184,255,.12);color:var(--blue);border:1px solid rgba(77,184,255,.3)}
 .b-pending,.b-todo,.b-open,.b-notstarted,.b-new,.b-yettostart{background:rgba(180,142,247,.12);color:var(--purple);border:1px solid rgba(180,142,247,.3)}
 .b-blocked,.b-hold,.b-onhold,.b-paused{background:rgba(255,95,109,.12);color:var(--coral);border:1px solid rgba(255,95,109,.3)}
 .b-default{background:var(--card2);color:var(--muted2);border:1px solid var(--border)}
-
 .tbl-footer{padding:11px 22px;border-top:1px solid var(--border);font-size:.7rem;color:var(--muted2);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
 
+/* ── FACULTY CARDS ── */
+.faculty-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:18px}
+.faculty-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;transition:border-color .2s,transform .2s}
+.faculty-card:hover{border-color:var(--muted);transform:translateY(-2px)}
+.fc-name{font-family:var(--fd);font-size:1rem;font-weight:800;margin-bottom:2px;color:var(--text)}
+.fc-project{font-size:.68rem;color:var(--muted2);margin-bottom:12px;letter-spacing:.04em}
+.fc-nums{display:flex;gap:16px;margin-bottom:10px}
+.fc-num{text-align:center}
+.fc-num-val{font-family:var(--fd);font-size:1.4rem;font-weight:900}
+.fc-num-lbl{font-size:.62rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.08em}
+.fc-bar-track{height:5px;background:var(--border);border-radius:99px;overflow:hidden}
+.fc-bar-fill{height:100%;border-radius:99px;transition:width .8s ease}
+.fc-pct{font-size:.7rem;color:var(--muted2);margin-top:5px;text-align:right}
+
 /* ── LOADER ── */
-#loader{display:flex;flex-direction:column;align-items:center;justify-content:center;height:72vh;gap:14px;position:relative;z-index:5}
+#loader{display:flex;flex-direction:column;align-items:center;justify-content:center;height:65vh;gap:14px;position:relative;z-index:5}
 .spin{width:44px;height:44px;border:2px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:sp .8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 .ltxt{font-size:.75rem;color:var(--muted2);letter-spacing:.1em}
 #err{display:none;background:rgba(255,95,109,.07);border:1px solid var(--coral);border-radius:12px;padding:18px 24px;color:var(--coral);font-size:.82rem;line-height:1.9;margin:16px 36px}
-#dash{display:none}
-
-/* ── ANIMATIONS ── */
+#app{display:none}
 .anim{animation:fu .45s ease both}
-@keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 
-/* ── RESPONSIVE ── */
-@media(max-width:1100px){.kpi-row{grid-template-columns:repeat(3,1fr)}.charts-row{grid-template-columns:1fr 1fr}}
-@media(max-width:760px){.kpi-row{grid-template-columns:repeat(2,1fr)}.charts-row{grid-template-columns:1fr}.bot-row{grid-template-columns:1fr}.mega-prog{grid-template-columns:1fr;text-align:center}}
-@media(max-width:520px){main,header{padding-left:14px;padding-right:14px}h1{font-size:1.8rem}}
+@media(max-width:1100px){.kpi-row{grid-template-columns:repeat(3,1fr)}.charts-row{grid-template-columns:1fr 1fr}.charts-row-2{grid-template-columns:1fr}}
+@media(max-width:760px){.kpi-row,.kpi-row-3{grid-template-columns:repeat(2,1fr)}.charts-row,.bot-row,.charts-row-2{grid-template-columns:1fr}.mega-prog{grid-template-columns:1fr}}
+@media(max-width:520px){main,header{padding-left:14px;padding-right:14px}h1{font-size:1.8rem}.tab-bar{padding:0 14px}}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="hdr-left">
+  <div>
     <div class="eyebrow"><div class="live-dot"></div><span class="eyebrow-lbl">Live · Google Sheets</span></div>
     <h1>Video Solutions <em>Tracker</em></h1>
     <div class="sub" id="sub-line">Connecting to your sheet…</div>
   </div>
-  <div class="hdr-right">
-    <button id="refresh-btn" onclick="load()">↻ Refresh</button>
-  </div>
+  <button id="refresh-btn" onclick="loadAll()">↻ Refresh</button>
 </header>
 
 <div id="loader"><div class="spin"></div><div class="ltxt">Fetching live data…</div></div>
 <div id="err"></div>
 
-<main id="dash">
-
-  <!-- KPI STRIP -->
-  <div class="kpi-row anim" style="animation-delay:.04s">
-    <div class="kc k1">
-      <div class="kt"><div class="kl">Total<br>Entries</div><div class="ki">📁</div></div>
-      <div class="kv" id="k-total">–</div><div class="kd">All rows</div>
-    </div>
-    <div class="kc k2">
-      <div class="kt"><div class="kl">Videos<br>Required</div><div class="ki">🎬</div></div>
-      <div class="kv" id="k-req">–</div><div class="kd">Total to produce</div>
-    </div>
-    <div class="kc k3">
-      <div class="kt"><div class="kl">Videos<br>Completed</div><div class="ki">✅</div></div>
-      <div class="kv" id="k-done">–</div><div class="kd">Produced so far</div>
-    </div>
-    <div class="kc k4">
-      <div class="kt"><div class="kl">Videos<br>Remaining</div><div class="ki">⏳</div></div>
-      <div class="kv" id="k-rem">–</div><div class="kd">Still to do</div>
-    </div>
-    <div class="kc k5">
-      <div class="kt"><div class="kl">Projects<br>Active</div><div class="ki">📊</div></div>
-      <div class="kv" id="k-proj">–</div><div class="kd">Unique projects</div>
-    </div>
+<div id="app">
+  <!-- TABS -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('overview')">📊 Overview</button>
+    <button class="tab-btn" onclick="switchTab('faculty')">👨‍🏫 Faculty Wise</button>
   </div>
 
-  <!-- MEGA PROGRESS -->
-  <div class="mega-prog anim" style="animation-delay:.09s">
-    <div class="mp-main">
-      <div class="mp-label">Overall Progress</div>
-      <div class="mp-title">Video Solutions Completion</div>
-      <div class="prog-track"><div class="prog-fill pf-teal" id="pf-main"></div></div>
-      <div class="prog-nums"><span><b id="pn-done">0</b> completed</span><span><b id="pn-req">0</b> required</span></div>
-    </div>
-    <div style="text-align:center">
-      <div class="mp-pct" id="mp-pct">0%<span>completion rate</span></div>
-    </div>
-    <div class="mp-stats">
-      <div class="mp-stat"><span class="mp-stat-label">Subjects covered</span><span class="mp-stat-val" id="ms-subj" style="color:var(--blue)">–</span></div>
-      <div class="mp-stat"><span class="mp-stat-label">Avg videos / entry</span><span class="mp-stat-val" id="ms-avg" style="color:var(--yellow)">–</span></div>
-      <div class="mp-stat"><span class="mp-stat-label">Fully done entries</span><span class="mp-stat-val" id="ms-full" style="color:var(--green)">–</span></div>
-    </div>
-  </div>
+  <main>
 
-  <!-- CHARTS ROW -->
-  <div class="charts-row anim" style="animation-delay:.14s">
-    <div class="sc">
-      <div class="stitle">Videos Required vs Completed — by Project</div>
-      <div class="ssub">Grouped bar comparison</div>
-      <div class="cw-tall"><canvas id="c-proj-bar"></canvas></div>
-    </div>
-    <div class="sc">
-      <div class="stitle">Tasks by Status</div>
-      <div class="ssub">Status distribution</div>
-      <div class="cw"><canvas id="c-status"></canvas></div>
-    </div>
-    <div class="sc">
-      <div class="stitle">Tasks by Subject</div>
-      <div class="ssub">Subject breakdown</div>
-      <div class="cw"><canvas id="c-subject"></canvas></div>
-    </div>
-  </div>
+    <!-- ══════════════ TAB 1: OVERVIEW ══════════════ -->
+    <div class="tab-panel active" id="tab-overview">
 
-  <!-- BOTTOM ROW -->
-  <div class="bot-row anim" style="animation-delay:.19s">
-    <div class="sc">
-      <div class="stitle">Completion % by Project</div>
-      <div class="ssub">How far each project has come</div>
-      <div class="cw"><canvas id="c-proj-pct"></canvas></div>
-    </div>
-    <div class="sc">
-      <div class="stitle">Videos Completed — by Subject</div>
-      <div class="ssub">Output across subjects</div>
-      <div class="cw"><canvas id="c-subj-done"></canvas></div>
-    </div>
-  </div>
-
-  <!-- TABLE -->
-  <div class="tbl-sec anim" style="animation-delay:.24s">
-    <div class="tbl-hdr">
-      <div class="tbl-ttl">All Records</div>
-      <div class="ctrl">
-        <input id="search" type="text" placeholder="🔍 Search…" oninput="applyF()"/>
-        <select id="f-proj"  onchange="applyF()"><option value="">All Projects</option></select>
-        <select id="f-subj"  onchange="applyF()"><option value="">All Subjects</option></select>
-        <select id="f-stat"  onchange="applyF()"><option value="">All Statuses</option></select>
+      <div class="kpi-row anim" style="animation-delay:.04s">
+        <div class="kc k1"><div class="kt"><div class="kl">Total<br>Entries</div><div class="ki">📁</div></div><div class="kv" id="k-total">–</div><div class="kd">All rows</div></div>
+        <div class="kc k2"><div class="kt"><div class="kl">Videos<br>Required</div><div class="ki">🎬</div></div><div class="kv" id="k-req">–</div><div class="kd">Total to produce</div></div>
+        <div class="kc k3"><div class="kt"><div class="kl">Videos<br>Completed</div><div class="ki">✅</div></div><div class="kv" id="k-done">–</div><div class="kd">Produced so far</div></div>
+        <div class="kc k4"><div class="kt"><div class="kl">Videos<br>Remaining</div><div class="ki">⏳</div></div><div class="kv" id="k-rem">–</div><div class="kd">Still to do</div></div>
+        <div class="kc k5"><div class="kt"><div class="kl">Projects<br>Active</div><div class="ki">📊</div></div><div class="kv" id="k-proj">–</div><div class="kd">Unique projects</div></div>
       </div>
-    </div>
-    <div class="twrap">
-      <table>
-        <thead>
-          <tr>
-            <th onclick="sortBy(0)" id="th0">Project <span>↕</span></th>
-            <th onclick="sortBy(1)" id="th1">Subject <span>↕</span></th>
-            <th onclick="sortBy(2)" id="th2">Status <span>↕</span></th>
-            <th onclick="sortBy(3)" id="th3">Required <span>↕</span></th>
-            <th onclick="sortBy(4)" id="th4">Completed <span>↕</span></th>
-            <th>Progress</th>
-          </tr>
-        </thead>
-        <tbody id="tb"></tbody>
-      </table>
-    </div>
-    <div class="tbl-footer">
-      <span id="rc">–</span>
-      <span style="color:var(--muted2)">Auto-refreshes every 60 seconds</span>
-    </div>
-  </div>
 
-</main>
+      <div class="mega-prog anim" style="animation-delay:.09s">
+        <div>
+          <div class="mp-label">Overall Progress</div>
+          <div class="mp-title">Video Solutions Completion</div>
+          <div class="prog-track"><div class="prog-fill pf-teal" id="pf-main"></div></div>
+          <div class="prog-nums"><span><b id="pn-done">0</b> completed</span><span><b id="pn-req">0</b> required</span></div>
+        </div>
+        <div style="text-align:center">
+          <div class="mp-pct" id="mp-pct">0%<span>completion rate</span></div>
+        </div>
+        <div class="mp-stats">
+          <div class="mp-stat"><span class="mp-stat-label">Subjects covered</span><span class="mp-stat-val" id="ms-subj" style="color:var(--blue)">–</span></div>
+          <div class="mp-stat"><span class="mp-stat-label">Avg videos / entry</span><span class="mp-stat-val" id="ms-avg" style="color:var(--yellow)">–</span></div>
+          <div class="mp-stat"><span class="mp-stat-label">Fully done entries</span><span class="mp-stat-val" id="ms-full" style="color:var(--green)">–</span></div>
+        </div>
+      </div>
+
+      <div class="charts-row anim" style="animation-delay:.14s">
+        <div class="sc"><div class="stitle">Required vs Completed — by Project</div><div class="ssub">Grouped bar comparison</div><div class="cw-tall"><canvas id="c-proj-bar"></canvas></div></div>
+        <div class="sc"><div class="stitle">Tasks by Status</div><div class="ssub">Status distribution</div><div class="cw"><canvas id="c-status"></canvas></div></div>
+        <div class="sc"><div class="stitle">Tasks by Subject</div><div class="ssub">Subject breakdown</div><div class="cw"><canvas id="c-subject"></canvas></div></div>
+      </div>
+
+      <div class="bot-row anim" style="animation-delay:.19s">
+        <div class="sc"><div class="stitle">Completion % by Project</div><div class="ssub">How far each project has come</div><div class="cw"><canvas id="c-proj-pct"></canvas></div></div>
+        <div class="sc"><div class="stitle">Videos Completed — by Subject</div><div class="ssub">Output across subjects</div><div class="cw"><canvas id="c-subj-done"></canvas></div></div>
+      </div>
+
+      <div class="tbl-sec anim" style="animation-delay:.24s">
+        <div class="tbl-hdr">
+          <div class="tbl-ttl">All Records</div>
+          <div class="ctrl">
+            <input class="sinp" id="search1" type="text" placeholder="🔍 Search…" oninput="renderT1()"/>
+            <select id="f-proj" onchange="renderT1()"><option value="">All Projects</option></select>
+            <select id="f-subj" onchange="renderT1()"><option value="">All Subjects</option></select>
+            <select id="f-stat" onchange="renderT1()"><option value="">All Statuses</option></select>
+          </div>
+        </div>
+        <div class="twrap"><table><thead><tr>
+          <th onclick="sortT1(0)" id="t1h0">Project <span>↕</span></th>
+          <th onclick="sortT1(1)" id="t1h1">Subject <span>↕</span></th>
+          <th onclick="sortT1(2)" id="t1h2">Status <span>↕</span></th>
+          <th onclick="sortT1(3)" id="t1h3">Required <span>↕</span></th>
+          <th onclick="sortT1(4)" id="t1h4">Completed <span>↕</span></th>
+          <th>Progress</th>
+        </tr></thead><tbody id="tb1"></tbody></table></div>
+        <div class="tbl-footer"><span id="rc1">–</span><span>Auto-refreshes every 60s</span></div>
+      </div>
+    </div><!-- /tab-overview -->
+
+
+    <!-- ══════════════ TAB 2: FACULTY WISE ══════════════ -->
+    <div class="tab-panel" id="tab-faculty">
+
+      <div class="kpi-row-3 anim" style="animation-delay:.04s">
+        <div class="kc k1"><div class="kt"><div class="kl">Total<br>Faculties</div><div class="ki">👨‍🏫</div></div><div class="kv" id="fk-total">–</div><div class="kd">Unique faculty members</div></div>
+        <div class="kc k2"><div class="kt"><div class="kl">Total VS<br>Assigned</div><div class="ki">🎬</div></div><div class="kv" id="fk-req">–</div><div class="kd">Across all projects</div></div>
+        <div class="kc k3"><div class="kt"><div class="kl">Total VS<br>Completed</div><div class="ki">✅</div></div><div class="kv" id="fk-done">–</div><div class="kd">Produced so far</div></div>
+      </div>
+
+      <!-- Faculty summary progress -->
+      <div class="mega-prog anim" style="animation-delay:.09s">
+        <div>
+          <div class="mp-label">Faculty Output</div>
+          <div class="mp-title">Overall Video Solutions Progress</div>
+          <div class="prog-track"><div class="prog-fill pf-teal" id="fpf-main"></div></div>
+          <div class="prog-nums"><span><b id="fpn-done">0</b> completed</span><span><b id="fpn-req">0</b> assigned</span></div>
+        </div>
+        <div style="text-align:center">
+          <div class="mp-pct" id="fmp-pct">0%<span>completion rate</span></div>
+        </div>
+        <div class="mp-stats">
+          <div class="mp-stat"><span class="mp-stat-label">Projects covered</span><span class="mp-stat-val" id="fms-proj" style="color:var(--blue)">–</span></div>
+          <div class="mp-stat"><span class="mp-stat-label">Top faculty</span><span class="mp-stat-val" id="fms-top" style="color:var(--yellow)">–</span></div>
+          <div class="mp-stat"><span class="mp-stat-label">100% done faculties</span><span class="mp-stat-val" id="fms-full" style="color:var(--green)">–</span></div>
+        </div>
+      </div>
+
+      <!-- Charts -->
+      <div class="charts-row-2 anim" style="animation-delay:.14s">
+        <div class="sc"><div class="stitle">Assigned vs Completed — by Faculty</div><div class="ssub">Grouped bar across all projects</div><div class="cw-xl"><canvas id="fc-bar"></canvas></div></div>
+        <div class="sc"><div class="stitle">Completion % by Faculty</div><div class="ssub">Color coded performance</div><div class="cw-xl"><canvas id="fc-pct"></canvas></div></div>
+      </div>
+
+      <div class="bot-row anim" style="animation-delay:.18s">
+        <div class="sc"><div class="stitle">Videos by Project</div><div class="ssub">Faculty load per project</div><div class="cw"><canvas id="fc-proj"></canvas></div></div>
+        <div class="sc"><div class="stitle">Faculty Distribution</div><div class="ssub">Task share per faculty</div><div class="cw"><canvas id="fc-donut"></canvas></div></div>
+      </div>
+
+      <!-- Section: Faculty Cards -->
+      <div class="section-hdr">
+        <div class="section-hdr-line"></div>
+        <div class="section-hdr-title">Faculty Performance Cards</div>
+        <div class="section-hdr-dot" style="background:var(--teal)"></div>
+        <div class="section-hdr-line"></div>
+      </div>
+      <div class="faculty-grid anim" id="faculty-cards" style="animation-delay:.2s"></div>
+
+      <!-- Faculty Table -->
+      <div class="tbl-sec anim" style="animation-delay:.24s">
+        <div class="tbl-hdr">
+          <div class="tbl-ttl">Faculty Detail Records</div>
+          <div class="ctrl">
+            <input class="sinp" id="search2" type="text" placeholder="🔍 Search faculty…" oninput="renderT2()"/>
+            <select id="f2-proj" onchange="renderT2()"><option value="">All Projects</option></select>
+            <select id="f2-subj" onchange="renderT2()"><option value="">All Subjects</option></select>
+          </div>
+        </div>
+        <div class="twrap"><table><thead><tr>
+          <th onclick="sortT2(0)">Faculty <span>↕</span></th>
+          <th onclick="sortT2(1)">Project <span>↕</span></th>
+          <th onclick="sortT2(2)">Subject <span>↕</span></th>
+          <th onclick="sortT2(3)">Assigned VS <span>↕</span></th>
+          <th onclick="sortT2(4)">Completed VS <span>↕</span></th>
+          <th>Progress</th>
+        </tr></thead><tbody id="tb2"></tbody></table></div>
+        <div class="tbl-footer"><span id="rc2">–</span></div>
+      </div>
+    </div><!-- /tab-faculty -->
+
+  </main>
+</div><!-- /app -->
 
 <script>
-// ── CONFIG ──────────────────────────────────────────────────
-const SHEET_ID = '1D80kh-8ypS0adpH1RRSl4Nb2IbBB93_DdHeslbgzm9Y';
-// Column indices (0-based) matching your headers:
-// 0:Project  1:Subject  2:Status  3:Video solutions required  4:Video solutions completed
-// ────────────────────────────────────────────────────────────
+// ── CONFIG ──────────────────────────────────────────────────────────
+const SHEET_ID   = '1D80kh-8ypS0adpH1RRSl4Nb2IbBB93_DdHeslbgzm9Y';
+const GID_SHEET1 = '0';
+const GID_SHEET2 = '679296378';
+// ────────────────────────────────────────────────────────────────────
 
-const C = ['#00d4aa','#f5c842','#ff5f6d','#4db8ff','#b48ef7','#ff9a3c','#3ddc97','#f472b6','#facc15','#60a5fa'];
-const key = s => (s||'').toLowerCase().replace(/[\s_\-\/()]/g,'');
+const C = ['#00d4aa','#f5c842','#ff5f6d','#4db8ff','#b48ef7','#ff9a3c','#3ddc97','#f472b6','#facc15','#60a5fa','#c084fc','#f87171'];
+const key = s => (s||'').toLowerCase().replace(/[\s_\-\/()\.]/g,'');
 
-let allRows = [], charts = {}, sortCol = -1, sortAsc = true;
+// State
+let sheet1Rows = [], facultyRows = [], charts = {};
+let s1Col=-1,s1Asc=true, s2Col=-1,s2Asc=true;
+let activeTab = 'overview';
 
-async function load() {
+// ── TAB SWITCH ────────────────────────────────────────────────────────
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`.tab-btn[onclick*="${tab}"]`).classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+// ── LOAD BOTH SHEETS ──────────────────────────────────────────────────
+async function loadAll() {
   document.getElementById('loader').style.display = 'flex';
-  document.getElementById('dash').style.display   = 'none';
+  document.getElementById('app').style.display    = 'none';
   document.getElementById('err').style.display    = 'none';
-
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&_=${Date.now()}`;
   try {
-    const res = await fetch(url);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const txt = await res.text();
-    const json = JSON.parse(txt.substring(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
-    if (json.status === 'error') throw new Error(json.errors?.[0]?.message || 'Sheet error');
-    parse(json);
+    const [j1, j2] = await Promise.all([
+      fetchSheet(GID_SHEET1),
+      fetchSheet(GID_SHEET2)
+    ]);
+    parseSheet1(j1);
+    parseSheet2(j2);
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('app').style.display    = 'block';
+    document.getElementById('sub-line').innerHTML =
+      `Last updated: <b>${new Date().toLocaleTimeString()}</b> · Auto-refreshes every 60s`;
+    buildOverview();
+    buildFaculty();
   } catch(e) { showErr(e.message); }
 }
 
-function parse(json) {
-  const t = json.table;
-  if (!t || !t.rows) { showErr('No data found.'); return; }
+async function fetchSheet(gid) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${gid}&_=${Date.now()}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const txt = await res.text();
+  return JSON.parse(txt.substring(txt.indexOf('{'), txt.lastIndexOf('}') + 1));
+}
 
-  // Skip header row if present, map to our 5 columns
-  allRows = (t.rows || []).map(r => {
+// ── PARSE SHEET 1 ─────────────────────────────────────────────────────
+function parseSheet1(json) {
+  const t = json.table;
+  if (!t || !t.rows) throw new Error('Sheet 1 has no data');
+  sheet1Rows = (t.rows || []).map(r => {
     const c = (r.c || []).map(cell => {
       if (!cell) return '';
       if (cell.f) return cell.f;
@@ -333,50 +388,116 @@ function parse(json) {
       subject: (c[1] || '').trim(),
       status:  (c[2] || '').trim(),
       req:     parseFloat(c[3]) || 0,
-      done:    parseFloat(c[4]) || 0,
-      raw:     c
+      done:    parseFloat(c[4]) || 0
     };
-  }).filter(r => r.project || r.subject || r.status);
+  }).filter(r => r.project || r.subject);
+}
 
-  if (!allRows.length) { showErr('Sheet appears empty or unreadable.'); return; }
+// ── PARSE SHEET 2 ─────────────────────────────────────────────────────
+// Sheet 2 structure (horizontal groups):
+// Row 0: Project names spanning columns (e.g. "Mission 100 (Chemistry)", "JEE main 2026 session -1", ...)
+// Row 1: Sub-headers: Chapter/Subject | Faculties | Assigned VS | Completed VS | (blank) | repeat...
+// Row 2+: Data rows
+function parseSheet2(json) {
+  facultyRows = [];
+  const t = json.table;
+  if (!t || !t.rows || t.rows.length < 2) return;
 
-  document.getElementById('loader').style.display = 'none';
-  document.getElementById('dash').style.display   = 'block';
-  document.getElementById('sub-line').innerHTML =
-    `Last updated: <b>${new Date().toLocaleTimeString()}</b> · Auto-refreshes every 60s`;
+  const rawRows = t.rows.map(r =>
+    (r.c || []).map(cell => {
+      if (!cell) return '';
+      if (cell.f) return cell.f;
+      if (cell.v === null || cell.v === undefined) return '';
+      return String(cell.v).trim();
+    })
+  );
 
-  buildDash();
+  if (rawRows.length < 2) return;
+
+  const row0 = rawRows[0]; // project names row
+  const row1 = rawRows[1]; // sub-header row
+
+  // Find project group starts by scanning row1 for "faculties" keyword
+  // Each group: [subject_col, faculty_col, assigned_col, completed_col]
+  const groups = [];
+  let currentProject = '';
+
+  for (let c = 0; c < row0.length; c++) {
+    if (row0[c]) currentProject = row0[c];
+  }
+
+  // Re-scan: track project per column from row0
+  const colProject = [];
+  let lastProj = '';
+  for (let c = 0; c < Math.max(row0.length, row1.length); c++) {
+    if (row0[c] && row0[c].trim()) lastProj = row0[c].trim();
+    colProject[c] = lastProj;
+  }
+
+  // Find faculty columns in row1
+  for (let c = 0; c < row1.length; c++) {
+    const h = key(row1[c]);
+    if (h === 'faculties' || h === 'faculty') {
+      // The group is: subject at c-1, faculty at c, assigned at c+1, completed at c+2
+      groups.push({
+        project:  colProject[c] || 'Unknown',
+        subjectCol: c - 1,
+        facultyCol: c,
+        reqCol:    c + 1,
+        doneCol:   c + 2
+      });
+    }
+  }
+
+  // Extract data rows (skip rows 0 and 1)
+  for (let ri = 2; ri < rawRows.length; ri++) {
+    const row = rawRows[ri];
+    for (const g of groups) {
+      const faculty = (row[g.facultyCol] || '').trim();
+      const req     = parseFloat(row[g.reqCol])  || 0;
+      const done    = parseFloat(row[g.doneCol]) || 0;
+      const subject = g.subjectCol >= 0 ? (row[g.subjectCol] || '').trim() : '';
+      if (faculty && (req > 0 || done > 0)) {
+        facultyRows.push({
+          faculty,
+          project: g.project,
+          subject,
+          req,
+          done
+        });
+      }
+    }
+  }
 }
 
 function showErr(msg) {
   document.getElementById('loader').style.display = 'none';
   const e = document.getElementById('err');
-  e.innerHTML = `⚠ Could not load data: <strong>${msg}</strong><br><br>
-    Make sure the sheet is shared as <em>"Anyone with the link → Viewer"</em>.<br>
-    Also go to <strong>File → Share → Publish to web</strong> → click Publish.<br>
-    Sheet ID: <code>${SHEET_ID}</code>`;
+  e.innerHTML = `⚠ Could not load: <strong>${msg}</strong><br><br>
+    Go to Google Sheet → <strong>File → Share → Publish to web</strong> → Publish.<br>
+    Also ensure "Anyone with the link → Viewer" is set.`;
   e.style.display = 'block';
 }
 
-function buildDash() {
-  const total    = allRows.length;
-  const totalReq = allRows.reduce((s, r) => s + r.req,  0);
-  const totalDon = allRows.reduce((s, r) => s + r.done, 0);
+// ── BUILD OVERVIEW (TAB 1) ─────────────────────────────────────────────
+function buildOverview() {
+  const rows = sheet1Rows;
+  const total    = rows.length;
+  const totalReq = rows.reduce((s,r) => s + r.req, 0);
+  const totalDon = rows.reduce((s,r) => s + r.done, 0);
   const totalRem = Math.max(0, totalReq - totalDon);
   const pct      = totalReq > 0 ? Math.round(totalDon / totalReq * 100) : 0;
-  const projects = [...new Set(allRows.map(r => r.project).filter(Boolean))];
-  const subjects = [...new Set(allRows.map(r => r.subject).filter(Boolean))];
-  const fullyDone = allRows.filter(r => r.req > 0 && r.done >= r.req).length;
+  const projects = [...new Set(rows.map(r => r.project).filter(Boolean))];
+  const subjects = [...new Set(rows.map(r => r.subject).filter(Boolean))];
+  const fullyDone = rows.filter(r => r.req > 0 && r.done >= r.req).length;
   const avgVid    = total > 0 ? (totalReq / total).toFixed(1) : '–';
 
-  // KPIs
   document.getElementById('k-total').textContent = total;
   document.getElementById('k-req').textContent   = totalReq;
   document.getElementById('k-done').textContent  = totalDon;
   document.getElementById('k-rem').textContent   = totalRem;
   document.getElementById('k-proj').textContent  = projects.length;
 
-  // Mega progress
   setTimeout(() => {
     document.getElementById('pf-main').style.width = pct + '%';
     document.getElementById('mp-pct').innerHTML    = pct + '%<span>completion rate</span>';
@@ -385,173 +506,296 @@ function buildDash() {
     document.getElementById('ms-subj').textContent = subjects.length;
     document.getElementById('ms-avg').textContent  = avgVid;
     document.getElementById('ms-full').textContent = fullyDone;
-  }, 250);
+  }, 300);
 
-  // Populate filters
-  const fProj = document.getElementById('f-proj');
-  const fSubj = document.getElementById('f-subj');
-  const fStat = document.getElementById('f-stat');
-  [fProj, fSubj, fStat].forEach(s => { while(s.options.length > 1) s.remove(1); });
-  projects.sort().forEach(v => fProj.add(new Option(v, v)));
-  subjects.sort().forEach(v => fSubj.add(new Option(v, v)));
-  [...new Set(allRows.map(r => r.status).filter(Boolean))].sort()
-    .forEach(v => fStat.add(new Option(v, v)));
+  // Filters
+  populateSelect('f-proj', projects.sort());
+  populateSelect('f-subj', subjects.sort());
+  populateSelect('f-stat', [...new Set(rows.map(r => r.status).filter(Boolean))].sort());
 
-  // Chart base config
-  const base = {
-    responsive: true, maintainAspectRatio: false,
-    animation: { duration: 800 },
-    plugins: { legend: { labels: { color: '#607d9b', font: { size: 11 }, boxWidth: 10, padding: 12 } } }
-  };
-  const darkScales = {
-    x: { ticks: { color: '#3a526b', font: { size: 10 } }, grid: { color: 'rgba(28,45,66,.9)' } },
-    y: { ticks: { color: '#3a526b', font: { size: 10 } }, grid: { color: 'rgba(28,45,66,.9)' } }
+  // Charts
+  const base = { responsive:true, maintainAspectRatio:false, animation:{duration:900},
+    plugins:{ legend:{ labels:{ color:'#607d9b', font:{size:11}, boxWidth:10, padding:12 } } } };
+  const dkS = {
+    x:{ ticks:{color:'#3a526b',font:{size:10}}, grid:{color:'rgba(28,45,66,.9)'} },
+    y:{ ticks:{color:'#3a526b',font:{size:10}}, grid:{color:'rgba(28,45,66,.9)'} }
   };
 
-  // ── CHART 1: Grouped bar — Required vs Completed by Project ──
-  const projReq  = {}, projDone = {};
-  allRows.forEach(r => {
+  // Grouped bar: required vs completed by project
+  const projReq={}, projDone={};
+  rows.forEach(r => {
     if (!r.project) return;
     projReq[r.project]  = (projReq[r.project]  || 0) + r.req;
     projDone[r.project] = (projDone[r.project] || 0) + r.done;
   });
   const projKeys = Object.keys(projReq).sort();
-  if (charts.pb) charts.pb.destroy();
-  charts.pb = new Chart('c-proj-bar', {
-    type: 'bar',
-    data: {
-      labels: projKeys,
-      datasets: [
-        { label: 'Required',  data: projKeys.map(k => projReq[k]),  backgroundColor: 'rgba(77,184,255,.7)',  borderRadius: 5, borderSkipped: false },
-        { label: 'Completed', data: projKeys.map(k => projDone[k]), backgroundColor: 'rgba(0,212,170,.7)',  borderRadius: 5, borderSkipped: false }
-      ]
-    },
-    options: { ...base, scales: darkScales }
-  });
+  mkChart('pb', 'c-proj-bar', 'bar', {
+    labels: projKeys,
+    datasets: [
+      { label:'Required',  data:projKeys.map(k=>projReq[k]),  backgroundColor:'rgba(77,184,255,.7)',  borderRadius:5, borderSkipped:false },
+      { label:'Completed', data:projKeys.map(k=>projDone[k]), backgroundColor:'rgba(0,212,170,.7)',  borderRadius:5, borderSkipped:false }
+    ]
+  }, {...base, scales:dkS});
 
-  // ── CHART 2: Donut — Status ──
-  const statCnt = {};
-  allRows.forEach(r => { if (r.status) statCnt[r.status] = (statCnt[r.status] || 0) + 1; });
-  if (charts.st) charts.st.destroy();
-  charts.st = new Chart('c-status', {
-    type: 'doughnut',
-    data: { labels: Object.keys(statCnt), datasets: [{ data: Object.values(statCnt), backgroundColor: C, borderWidth: 0, hoverOffset: 10 }] },
-    options: { ...base, cutout: '63%', plugins: { legend: { position: 'bottom', labels: { color: '#607d9b', font: { size: 10 }, boxWidth: 10, padding: 8 } } } }
-  });
+  // Donut: Status
+  const stCnt={};
+  rows.forEach(r => { if(r.status) stCnt[r.status]=(stCnt[r.status]||0)+1; });
+  mkChart('st','c-status','doughnut',
+    {labels:Object.keys(stCnt),datasets:[{data:Object.values(stCnt),backgroundColor:C,borderWidth:0,hoverOffset:10}]},
+    {...base,cutout:'63%',plugins:{legend:{position:'bottom',labels:{color:'#607d9b',font:{size:10},boxWidth:10,padding:8}}}});
 
-  // ── CHART 3: Donut — Subject ──
-  const subjCnt = {};
-  allRows.forEach(r => { if (r.subject) subjCnt[r.subject] = (subjCnt[r.subject] || 0) + 1; });
-  if (charts.su) charts.su.destroy();
-  charts.su = new Chart('c-subject', {
-    type: 'doughnut',
-    data: { labels: Object.keys(subjCnt), datasets: [{ data: Object.values(subjCnt), backgroundColor: C, borderWidth: 0, hoverOffset: 10 }] },
-    options: { ...base, cutout: '63%', plugins: { legend: { position: 'bottom', labels: { color: '#607d9b', font: { size: 10 }, boxWidth: 10, padding: 8 } } } }
-  });
+  // Donut: Subject
+  const suCnt={};
+  rows.forEach(r => { if(r.subject) suCnt[r.subject]=(suCnt[r.subject]||0)+1; });
+  mkChart('su','c-subject','doughnut',
+    {labels:Object.keys(suCnt),datasets:[{data:Object.values(suCnt),backgroundColor:C,borderWidth:0,hoverOffset:10}]},
+    {...base,cutout:'63%',plugins:{legend:{position:'bottom',labels:{color:'#607d9b',font:{size:10},boxWidth:10,padding:8}}}});
 
-  // ── CHART 4: Horizontal bar — Completion % by Project ──
-  const projPct = projKeys.map(k => projReq[k] > 0 ? Math.round(projDone[k] / projReq[k] * 100) : 0);
-  const pctColors = projPct.map(p => p >= 80 ? 'rgba(0,212,170,.75)' : p >= 50 ? 'rgba(77,184,255,.75)' : p >= 20 ? 'rgba(245,200,66,.75)' : 'rgba(255,95,109,.75)');
-  if (charts.pp) charts.pp.destroy();
-  charts.pp = new Chart('c-proj-pct', {
-    type: 'bar',
-    data: {
-      labels: projKeys,
-      datasets: [{ label: '% Complete', data: projPct, backgroundColor: pctColors, borderRadius: 6, borderSkipped: false }]
-    },
-    options: {
-      ...base, indexAxis: 'y',
-      plugins: { legend: { display: false } },
-      scales: {
-        x: { ...darkScales.x, max: 100, ticks: { ...darkScales.x.ticks, callback: v => v + '%' } },
-        y: { ...darkScales.y }
-      }
-    }
-  });
+  // Horizontal bar: completion % by project
+  const projPct = projKeys.map(k => projReq[k]>0 ? Math.round(projDone[k]/projReq[k]*100) : 0);
+  const pctClr  = projPct.map(p => p>=80?'rgba(0,212,170,.75)':p>=50?'rgba(77,184,255,.75)':p>=20?'rgba(245,200,66,.75)':'rgba(255,95,109,.75)');
+  mkChart('pp','c-proj-pct','bar',
+    {labels:projKeys,datasets:[{label:'% Complete',data:projPct,backgroundColor:pctClr,borderRadius:6,borderSkipped:false}]},
+    {...base,indexAxis:'y',plugins:{legend:{display:false}},
+     scales:{x:{...dkS.x,max:100,ticks:{...dkS.x.ticks,callback:v=>v+'%'}},y:dkS.y}});
 
-  // ── CHART 5: Bar — Videos completed by Subject ──
-  const subjDone = {};
-  allRows.forEach(r => { if (r.subject) subjDone[r.subject] = (subjDone[r.subject] || 0) + r.done; });
-  const subjKeys = Object.keys(subjDone).sort((a,b) => subjDone[b] - subjDone[a]).slice(0, 10);
-  if (charts.sd) charts.sd.destroy();
-  charts.sd = new Chart('c-subj-done', {
-    type: 'bar',
-    data: {
-      labels: subjKeys,
-      datasets: [{ label: 'Completed', data: subjKeys.map(k => subjDone[k]), backgroundColor: C, borderRadius: 6, borderSkipped: false }]
-    },
-    options: { ...base, indexAxis: 'y', plugins: { legend: { display: false } }, scales: darkScales }
-  });
+  // Bar: completed by subject
+  const suDone={};
+  rows.forEach(r => { if(r.subject) suDone[r.subject]=(suDone[r.subject]||0)+r.done; });
+  const suKeys = Object.keys(suDone).sort((a,b)=>suDone[b]-suDone[a]).slice(0,10);
+  mkChart('sd','c-subj-done','bar',
+    {labels:suKeys,datasets:[{label:'Completed',data:suKeys.map(k=>suDone[k]),backgroundColor:C,borderRadius:6,borderSkipped:false}]},
+    {...base,indexAxis:'y',plugins:{legend:{display:false}},scales:dkS});
 
-  applyF();
+  renderT1();
 }
 
-function sortBy(col) {
-  sortAsc = sortCol === col ? !sortAsc : true;
-  sortCol = col;
-  document.querySelectorAll('thead th').forEach((th, i) => {
-    th.classList.toggle('sorted', i === col);
-    const sp = th.querySelector('span');
-    if (sp) sp.textContent = i === col ? (sortAsc ? '↑' : '↓') : '↕';
-  });
-  renderT();
-}
-
-function applyF() { renderT(); }
-
-function renderT() {
-  const fP = (document.getElementById('f-proj') || {}).value || '';
-  const fS = (document.getElementById('f-subj') || {}).value || '';
-  const fSt= (document.getElementById('f-stat') || {}).value || '';
-  const sq = (document.getElementById('search')  || {}).value?.toLowerCase() || '';
-
-  let data = allRows.filter(r => {
-    if (fP  && r.project !== fP)  return false;
-    if (fS  && r.subject !== fS)  return false;
-    if (fSt && r.status  !== fSt) return false;
-    if (sq  && !(r.project + r.subject + r.status).toLowerCase().includes(sq)) return false;
-    return true;
-  });
-
-  if (sortCol >= 0) {
-    data = [...data].sort((a, b) => {
-      const vals = [a.project, a.subject, a.status, a.req, a.done];
-      const valb = [b.project, b.subject, b.status, b.req, b.done];
-      const va = vals[sortCol] ?? '', vb = valb[sortCol] ?? '';
-      const na = parseFloat(va), nb = parseFloat(vb);
-      const c = (!isNaN(na) && !isNaN(nb)) ? na - nb : String(va).localeCompare(String(vb));
-      return sortAsc ? c : -c;
-    });
+// ── BUILD FACULTY (TAB 2) ──────────────────────────────────────────────
+function buildFaculty() {
+  const rows = facultyRows;
+  if (!rows.length) {
+    document.getElementById('tab-faculty').innerHTML +=
+      '<div style="padding:40px;text-align:center;color:var(--muted2)">No faculty data found in Sheet 2. Make sure it is published to web.</div>';
+    return;
   }
 
-  const tb = document.getElementById('tb');
-  tb.innerHTML = '';
-  data.forEach(r => {
-    const pct  = r.req > 0 ? Math.round(r.done / r.req * 100) : 0;
-    const fillColor = pct >= 80 ? 'var(--teal)' : pct >= 50 ? 'var(--blue)' : pct > 0 ? 'var(--yellow)' : 'var(--coral)';
-    const bk   = 'b-' + key(r.status);
-    const tr   = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="wrap-cell">${r.project || '–'}</td>
-      <td class="wrap-cell">${r.subject || '–'}</td>
-      <td><span class="badge ${bk}">${r.status || '–'}</span></td>
-      <td style="color:var(--blue);font-weight:600">${r.req}</td>
-      <td style="color:var(--teal);font-weight:600">${r.done}</td>
-      <td>
-        <div class="tprog">
-          <div class="tprog-track"><div class="tprog-fill" style="width:${pct}%;background:${fillColor}"></div></div>
-          <span class="tprog-lbl">${pct}%</span>
-        </div>
-      </td>`;
-    tb.appendChild(tr);
+  // Aggregate by faculty (total across all projects)
+  const facMap = {};
+  rows.forEach(r => {
+    if (!facMap[r.faculty]) facMap[r.faculty] = { req:0, done:0, projects:new Set() };
+    facMap[r.faculty].req  += r.req;
+    facMap[r.faculty].done += r.done;
+    facMap[r.faculty].projects.add(r.project);
   });
 
-  const rc = document.getElementById('rc');
-  if (rc) rc.textContent = `Showing ${data.length} of ${allRows.length} records`;
+  const facNames   = Object.keys(facMap).sort();
+  const totalFacReq  = rows.reduce((s,r)=>s+r.req,0);
+  const totalFacDone = rows.reduce((s,r)=>s+r.done,0);
+  const facPct = totalFacReq>0?Math.round(totalFacDone/totalFacReq*100):0;
+  const projects = [...new Set(rows.map(r=>r.project).filter(Boolean))];
+  const topFaculty = facNames.sort((a,b)=>facMap[b].done-facMap[a].done)[0] || '–';
+  const fullFac = facNames.filter(f=>facMap[f].req>0&&facMap[f].done>=facMap[f].req).length;
+
+  // KPIs
+  document.getElementById('fk-total').textContent = facNames.length;
+  document.getElementById('fk-req').textContent   = totalFacReq;
+  document.getElementById('fk-done').textContent  = totalFacDone;
+
+  setTimeout(() => {
+    document.getElementById('fpf-main').style.width = facPct + '%';
+    document.getElementById('fmp-pct').innerHTML    = facPct + '%<span>completion rate</span>';
+    document.getElementById('fpn-done').textContent = totalFacDone;
+    document.getElementById('fpn-req').textContent  = totalFacReq;
+    document.getElementById('fms-proj').textContent = projects.length;
+    document.getElementById('fms-top').textContent  = topFaculty;
+    document.getElementById('fms-full').textContent = fullFac;
+  }, 300);
+
+  // Filters for faculty table
+  populateSelect('f2-proj', projects.sort());
+  populateSelect('f2-subj', [...new Set(rows.map(r=>r.subject).filter(Boolean))].sort());
+
+  // Charts
+  const base = { responsive:true, maintainAspectRatio:false, animation:{duration:900},
+    plugins:{ legend:{ labels:{ color:'#607d9b', font:{size:11}, boxWidth:10, padding:12 } } } };
+  const dkS = {
+    x:{ ticks:{color:'#3a526b',font:{size:10}}, grid:{color:'rgba(28,45,66,.9)'} },
+    y:{ ticks:{color:'#3a526b',font:{size:10}}, grid:{color:'rgba(28,45,66,.9)'} }
+  };
+
+  const sortedFac = facNames.sort((a,b)=>facMap[b].req-facMap[a].req);
+
+  // Grouped bar: assigned vs completed by faculty
+  mkChart('fb','fc-bar','bar',{
+    labels: sortedFac,
+    datasets:[
+      {label:'Assigned',  data:sortedFac.map(f=>facMap[f].req),  backgroundColor:'rgba(77,184,255,.7)',  borderRadius:4,borderSkipped:false},
+      {label:'Completed', data:sortedFac.map(f=>facMap[f].done), backgroundColor:'rgba(0,212,170,.7)',  borderRadius:4,borderSkipped:false}
+    ]
+  },{...base,scales:dkS});
+
+  // Horizontal bar: completion % by faculty — colour coded
+  const fPcts = sortedFac.map(f=>facMap[f].req>0?Math.round(facMap[f].done/facMap[f].req*100):0);
+  const fClrs = fPcts.map(p=>p>=80?'rgba(0,212,170,.8)':p>=50?'rgba(77,184,255,.8)':p>=20?'rgba(245,200,66,.8)':'rgba(255,95,109,.8)');
+  mkChart('fpct','fc-pct','bar',{
+    labels:sortedFac,
+    datasets:[{label:'% Done',data:fPcts,backgroundColor:fClrs,borderRadius:5,borderSkipped:false}]
+  },{...base,indexAxis:'y',plugins:{legend:{display:false}},
+    scales:{x:{...dkS.x,max:100,ticks:{...dkS.x.ticks,callback:v=>v+'%'}},y:dkS.y}});
+
+  // Grouped bar: by project (stacked)
+  const projFacMap = {};
+  rows.forEach(r => {
+    if(!projFacMap[r.project]) projFacMap[r.project]={req:0,done:0};
+    projFacMap[r.project].req  += r.req;
+    projFacMap[r.project].done += r.done;
+  });
+  const pKeys = Object.keys(projFacMap).sort();
+  mkChart('fproj','fc-proj','bar',{
+    labels:pKeys,
+    datasets:[
+      {label:'Assigned',  data:pKeys.map(k=>projFacMap[k].req),  backgroundColor:'rgba(180,142,247,.7)', borderRadius:4,borderSkipped:false},
+      {label:'Completed', data:pKeys.map(k=>projFacMap[k].done), backgroundColor:'rgba(61,220,151,.7)',  borderRadius:4,borderSkipped:false}
+    ]
+  },{...base,scales:dkS});
+
+  // Donut: faculty share of total assigned
+  mkChart('fdnt','fc-donut','doughnut',{
+    labels:sortedFac,
+    datasets:[{data:sortedFac.map(f=>facMap[f].req),backgroundColor:C,borderWidth:0,hoverOffset:10}]
+  },{...base,cutout:'60%',plugins:{legend:{position:'bottom',labels:{color:'#607d9b',font:{size:10},boxWidth:10,padding:8}}}});
+
+  // Faculty cards
+  const grid = document.getElementById('faculty-cards');
+  grid.innerHTML = '';
+  sortedFac.forEach((name, i) => {
+    const fm  = facMap[name];
+    const pct = fm.req>0?Math.round(fm.done/fm.req*100):0;
+    const clr = pct>=80?'var(--teal)':pct>=50?'var(--blue)':pct>=20?'var(--yellow)':'var(--coral)';
+    const div = document.createElement('div');
+    div.className = 'faculty-card';
+    div.style.animationDelay = (i*0.04) + 's';
+    div.innerHTML = `
+      <div class="fc-name">${name}</div>
+      <div class="fc-project">${[...facMap[name].projects].join(' · ')}</div>
+      <div class="fc-nums">
+        <div class="fc-num"><div class="fc-num-val" style="color:var(--blue)">${fm.req}</div><div class="fc-num-lbl">Assigned</div></div>
+        <div class="fc-num"><div class="fc-num-val" style="color:var(--teal)">${fm.done}</div><div class="fc-num-lbl">Completed</div></div>
+        <div class="fc-num"><div class="fc-num-val" style="color:${clr}">${pct}%</div><div class="fc-num-lbl">Done</div></div>
+      </div>
+      <div class="fc-bar-track"><div class="fc-bar-fill" style="width:${pct}%;background:${clr}"></div></div>
+      <div class="fc-pct">${fm.done} of ${fm.req} completed</div>`;
+    grid.appendChild(div);
+  });
+
+  renderT2();
 }
 
-load();
-setInterval(load, 60000);
+// ── HELPER: populate select ────────────────────────────────────────────
+function populateSelect(id, values) {
+  const s = document.getElementById(id);
+  if (!s) return;
+  while (s.options.length > 1) s.remove(1);
+  values.forEach(v => s.add(new Option(v, v)));
+}
+
+// ── HELPER: create/replace chart ──────────────────────────────────────
+function mkChart(key, canvasId, type, data, options) {
+  if (charts[key]) charts[key].destroy();
+  const el = document.getElementById(canvasId);
+  if (!el) return;
+  charts[key] = new Chart(canvasId, { type, data, options });
+}
+
+// ── TABLE 1 (Overview) ────────────────────────────────────────────────
+function sortT1(col) {
+  s1Asc = s1Col===col ? !s1Asc : true;
+  s1Col = col;
+  document.querySelectorAll('#tab-overview thead th').forEach((th,i) => {
+    th.classList.toggle('sorted', i===col);
+    const sp=th.querySelector('span'); if(sp) sp.textContent=i===col?(s1Asc?'↑':'↓'):'↕';
+  });
+  renderT1();
+}
+
+function renderT1() {
+  const fP = (document.getElementById('f-proj')||{}).value||'';
+  const fS = (document.getElementById('f-subj')||{}).value||'';
+  const fSt= (document.getElementById('f-stat')||{}).value||'';
+  const sq = ((document.getElementById('search1')||{}).value||'').toLowerCase();
+  let data = sheet1Rows.filter(r => {
+    if(fP&&r.project!==fP) return false;
+    if(fS&&r.subject!==fS) return false;
+    if(fSt&&r.status!==fSt) return false;
+    if(sq&&!(r.project+r.subject+r.status).toLowerCase().includes(sq)) return false;
+    return true;
+  });
+  if(s1Col>=0) data=[...data].sort((a,b)=>{
+    const vals=[a.project,a.subject,a.status,a.req,a.done];
+    const va=vals[s1Col]??'', vb=[b.project,b.subject,b.status,b.req,b.done][s1Col]??'';
+    const na=parseFloat(va),nb=parseFloat(vb);
+    const c=(!isNaN(na)&&!isNaN(nb))?na-nb:String(va).localeCompare(String(vb));
+    return s1Asc?c:-c;
+  });
+  const tb=document.getElementById('tb1'); tb.innerHTML='';
+  data.forEach(r => {
+    const pct=r.req>0?Math.round(r.done/r.req*100):0;
+    const fc=pct>=80?'var(--teal)':pct>=50?'var(--blue)':pct>0?'var(--yellow)':'var(--coral)';
+    const bk='b-'+key(r.status);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="wrap-cell">${r.project||'–'}</td><td class="wrap-cell">${r.subject||'–'}</td>
+      <td><span class="badge ${bk}">${r.status||'–'}</span></td>
+      <td style="color:var(--blue);font-weight:600">${r.req}</td>
+      <td style="color:var(--teal);font-weight:600">${r.done}</td>
+      <td><div class="tprog"><div class="tprog-track"><div class="tprog-fill" style="width:${pct}%;background:${fc}"></div></div><span class="tprog-lbl">${pct}%</span></div></td>`;
+    tb.appendChild(tr);
+  });
+  const rc=document.getElementById('rc1'); if(rc) rc.textContent=`Showing ${data.length} of ${sheet1Rows.length} records`;
+}
+
+// ── TABLE 2 (Faculty) ──────────────────────────────────────────────────
+function sortT2(col) {
+  s2Asc = s2Col===col ? !s2Asc : true;
+  s2Col = col;
+  renderT2();
+}
+
+function renderT2() {
+  const fP = (document.getElementById('f2-proj')||{}).value||'';
+  const fS = (document.getElementById('f2-subj')||{}).value||'';
+  const sq = ((document.getElementById('search2')||{}).value||'').toLowerCase();
+  let data = facultyRows.filter(r => {
+    if(fP&&r.project!==fP) return false;
+    if(fS&&r.subject!==fS) return false;
+    if(sq&&!(r.faculty+r.project+r.subject).toLowerCase().includes(sq)) return false;
+    return true;
+  });
+  if(s2Col>=0) data=[...data].sort((a,b)=>{
+    const vals=[a.faculty,a.project,a.subject,a.req,a.done];
+    const va=vals[s2Col]??'', vb=[b.faculty,b.project,b.subject,b.req,b.done][s2Col]??'';
+    const na=parseFloat(va),nb=parseFloat(vb);
+    const c=(!isNaN(na)&&!isNaN(nb))?na-nb:String(va).localeCompare(String(vb));
+    return s2Asc?c:-c;
+  });
+  const tb=document.getElementById('tb2'); tb.innerHTML='';
+  data.forEach(r => {
+    const pct=r.req>0?Math.round(r.done/r.req*100):0;
+    const fc=pct>=80?'var(--teal)':pct>=50?'var(--blue)':pct>0?'var(--yellow)':'var(--coral)';
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-weight:600;color:var(--text)">${r.faculty||'–'}</td>
+      <td class="wrap-cell" style="color:var(--muted2)">${r.project||'–'}</td>
+      <td class="wrap-cell">${r.subject||'–'}</td>
+      <td style="color:var(--blue);font-weight:600">${r.req}</td>
+      <td style="color:var(--teal);font-weight:600">${r.done}</td>
+      <td><div class="tprog"><div class="tprog-track"><div class="tprog-fill" style="width:${pct}%;background:${fc}"></div></div><span class="tprog-lbl">${pct}%</span></div></td>`;
+    tb.appendChild(tr);
+  });
+  const rc=document.getElementById('rc2'); if(rc) rc.textContent=`Showing ${data.length} of ${facultyRows.length} records`;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────
+loadAll();
+setInterval(loadAll, 60000);
 </script>
 </body>
 </html>
