@@ -1,4 +1,1081 @@
-<!DOCTYPE html>
+<!DOCTY<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Video Solutions Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Cabinet+Grotesk:wght@500;700;800;900&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#080d18; --card:#0f1623; --card2:#162030; --border:#1c2d42;
+  --yellow:#f5c842; --teal:#00d4aa; --coral:#ff5f6d; --purple:#b48ef7;
+  --blue:#4db8ff; --orange:#ff9a3c; --green:#3ddc97; --pink:#f472b6;
+  --text:#eef2ff; --muted:#3a526b; --muted2:#607d9b;
+  --fd:'Cabinet Grotesk',sans-serif; --fb:'DM Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:14px;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 60% 40% at 10% 10%,rgba(0,212,170,.06) 0%,transparent 60%),
+             radial-gradient(ellipse 50% 40% at 90% 90%,rgba(245,200,66,.05) 0%,transparent 60%)}
+header{position:relative;z-index:10;padding:28px 36px 0;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.eyebrow{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px var(--teal);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.eyebrow-lbl{font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted2)}
+h1{font-family:var(--fd);font-size:2.6rem;font-weight:900;line-height:1.05;margin-bottom:6px}
+h1 em{color:var(--teal);font-style:normal}
+.sub{font-size:.75rem;color:var(--muted2);padding-bottom:24px}
+.sub b{color:var(--yellow)}
+#refresh-btn{background:none;border:1px solid var(--border);color:var(--teal);font-family:var(--fb);font-size:.72rem;padding:8px 16px;border-radius:8px;cursor:pointer;transition:all .2s;margin-top:8px}
+#refresh-btn:hover{background:var(--teal);color:var(--bg)}
+.tab-bar{position:relative;z-index:5;display:flex;gap:4px;padding:0 36px;border-bottom:1px solid var(--border)}
+.tab-btn{font-family:var(--fd);font-size:.82rem;font-weight:700;padding:12px 24px;background:none;border:none;color:var(--muted2);cursor:pointer;transition:color .2s;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:.03em}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--teal);border-bottom-color:var(--teal)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+main{position:relative;z-index:1;padding:24px 36px 56px}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:18px}
+.kpi-row-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+.kpi-row-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 20px 16px;position:relative;overflow:hidden;transition:transform .2s,border-color .2s}
+.kc:hover{transform:translateY(-2px);border-color:var(--muted)}
+.kc::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px}
+.kc.k1::after{background:var(--yellow)}.kc.k2::after{background:var(--teal)}
+.kc.k3::after{background:var(--coral)}.kc.k4::after{background:var(--blue)}
+.kc.k5::after{background:var(--green)}.kc.k6::after{background:var(--orange)}
+.kt{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.kl{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);line-height:1.4}
+.ki{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0}
+.kc.k1 .ki{background:rgba(245,200,66,.1)}.kc.k2 .ki{background:rgba(0,212,170,.1)}
+.kc.k3 .ki{background:rgba(255,95,109,.1)}.kc.k4 .ki{background:rgba(77,184,255,.1)}
+.kc.k5 .ki{background:rgba(61,220,151,.1)}.kc.k6 .ki{background:rgba(255,154,60,.1)}
+.kv{font-family:var(--fd);font-size:2.2rem;font-weight:900;line-height:1;margin-bottom:3px}
+.kc.k1 .kv{color:var(--yellow)}.kc.k2 .kv{color:var(--teal)}
+.kc.k3 .kv{color:var(--coral)}.kc.k4 .kv{color:var(--blue)}
+.kc.k5 .kv{color:var(--green)}.kc.k6 .kv{color:var(--orange)}
+.kd{font-size:.7rem;color:var(--muted2)}
+.mega-prog{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin-bottom:18px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px;align-items:center}
+.mp-label{font-size:.65rem;letter-spacing:.13em;text-transform:uppercase;color:var(--muted2);margin-bottom:6px}
+.mp-title{font-family:var(--fd);font-size:1rem;font-weight:800;margin-bottom:14px}
+.prog-track{height:10px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:8px}
+.prog-fill{height:100%;border-radius:99px;transition:width 1.2s cubic-bezier(.4,0,.2,1);width:0%}
+.pf-teal{background:linear-gradient(90deg,var(--teal),#00f7c3)}
+.pf-orange{background:linear-gradient(90deg,var(--orange),var(--yellow))}
+.prog-nums{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted2)}
+.prog-nums b{color:var(--text)}
+.mp-pct{font-family:var(--fd);font-size:3.5rem;font-weight:900;color:var(--teal);text-align:center;line-height:1}
+.mp-pct span{display:block;font-size:.72rem;font-weight:400;color:var(--muted2);margin-top:4px;font-family:var(--fb)}
+.mp-pct.orange{color:var(--orange)}
+.mp-stats{display:flex;flex-direction:column;gap:14px}
+.mp-stat{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mp-stat-label{font-size:.72rem;color:var(--muted2)}
+.mp-stat-val{font-family:var(--fd);font-size:1rem;font-weight:800}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px 24px}
+.stitle{font-family:var(--fd);font-size:1rem;font-weight:800;margin-bottom:2px}
+.ssub{font-size:.7rem;color:var(--muted2);margin-bottom:18px}
+.cw{position:relative;height:220px}
+.cw-tall{position:relative;height:260px}
+.cw-xl{position:relative;height:300px}
+.cw-2xl{position:relative;height:340px}
+.charts-row{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:16px;margin-bottom:18px}
+.charts-row-2col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+.charts-row-3col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:18px}
+.bot-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px}
+.charts-row-2{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:18px}
+.full-row{margin-bottom:18px}
+.sec-div{display:flex;align-items:center;gap:12px;margin:28px 0 16px}
+.sec-div-line{flex:1;height:1px;background:var(--border)}
+.sec-div-title{font-family:var(--fd);font-size:.72rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);white-space:nowrap;padding:0 4px}
+.sec-div-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--teal)}
+/* Month pills */
+.month-pill-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.month-pill{font-family:var(--fd);font-size:.72rem;font-weight:700;padding:7px 16px;border-radius:99px;border:1px solid var(--border);background:var(--card);color:var(--muted2);cursor:pointer;transition:all .2s;letter-spacing:.04em}
+.month-pill:hover{border-color:var(--muted);color:var(--text)}
+.month-pill.active{background:rgba(0,212,170,.12);border-color:var(--teal);color:var(--teal)}
+/* Month breakdown cards */
+.month-stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:18px}
+.month-stat-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 18px;transition:border-color .2s,transform .2s}
+.month-stat-card:hover{border-color:var(--muted);transform:translateY(-2px)}
+.msc-label{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted2);margin-bottom:6px}
+.msc-val{font-family:var(--fd);font-size:1.9rem;font-weight:900;color:var(--orange);line-height:1;margin-bottom:4px}
+.msc-sub{font-size:.68rem;color:var(--muted2)}
+/* faculty grid */
+.faculty-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:18px}
+.fc-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;transition:border-color .2s,transform .2s;animation:fu .4s ease both}
+.fc-card:hover{border-color:var(--muted);transform:translateY(-2px)}
+.fc-name{font-family:var(--fd);font-size:1rem;font-weight:800;margin-bottom:2px}
+.fc-proj{font-size:.67rem;color:var(--muted2);margin-bottom:12px;line-height:1.5}
+.fc-nums{display:flex;gap:12px;margin-bottom:10px}
+.fc-num{text-align:center;flex:1}
+.fc-num-v{font-family:var(--fd);font-size:1.4rem;font-weight:900}
+.fc-num-l{font-size:.6rem;color:var(--muted2);text-transform:uppercase;letter-spacing:.07em}
+.fc-bar{height:5px;background:var(--border);border-radius:99px;overflow:hidden;margin-bottom:5px}
+.fc-bar-fill{height:100%;border-radius:99px;transition:width .9s ease}
+.fc-pct-lbl{font-size:.68rem;color:var(--muted2);text-align:right}
+/* table */
+.tbl-sec{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:18px}
+.tbl-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px}
+.tbl-ttl{font-family:var(--fd);font-size:.95rem;font-weight:800}
+.ctrl{display:flex;gap:8px;flex-wrap:wrap}
+select,.sinp{background:var(--card2);border:1px solid var(--border);color:var(--text);font-family:var(--fb);font-size:.72rem;padding:7px 11px;border-radius:8px;outline:none;cursor:pointer;transition:border-color .2s}
+select:focus,.sinp:focus{border-color:var(--teal)}
+.sinp{width:175px}.sinp::placeholder{color:var(--muted)}
+.twrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.78rem}
+thead th{padding:10px 16px;text-align:left;font-size:.61rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted2);border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+thead th:hover{color:var(--yellow)}
+thead th.sorted{color:var(--teal)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+tbody tr:hover{background:var(--card2)}
+tbody tr:last-child{border-bottom:none}
+td{padding:11px 16px;vertical-align:middle;white-space:nowrap}
+td.wc{white-space:normal;min-width:130px}
+.tprog{display:flex;align-items:center;gap:8px}
+.tprog-track{flex:1;height:5px;background:var(--border);border-radius:99px;overflow:hidden;min-width:55px}
+.tprog-fill{height:100%;border-radius:99px;transition:width .6s ease}
+.tprog-lbl{font-size:.7rem;color:var(--muted2);white-space:nowrap;min-width:32px;text-align:right}
+.badge{display:inline-flex;padding:3px 11px;border-radius:99px;font-size:.61rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
+.b-done,.b-complete,.b-completed,.b-closed,.b-finished{background:rgba(0,212,170,.12);color:var(--teal);border:1px solid rgba(0,212,170,.3)}
+.b-inprogress,.b-active,.b-ongoing,.b-started,.b-progress,.b-wip{background:rgba(77,184,255,.12);color:var(--blue);border:1px solid rgba(77,184,255,.3)}
+.b-pending,.b-todo,.b-open,.b-notstarted,.b-new{background:rgba(180,142,247,.12);color:var(--purple);border:1px solid rgba(180,142,247,.3)}
+.b-blocked,.b-hold,.b-onhold{background:rgba(255,95,109,.12);color:var(--coral);border:1px solid rgba(255,95,109,.3)}
+.b-default{background:var(--card2);color:var(--muted2);border:1px solid var(--border)}
+.tbl-footer{padding:11px 22px;border-top:1px solid var(--border);font-size:.7rem;color:var(--muted2);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+#loader{display:flex;flex-direction:column;align-items:center;justify-content:center;height:65vh;gap:14px;position:relative;z-index:5}
+.spin{width:44px;height:44px;border:2px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.ltxt{font-size:.75rem;color:var(--muted2);letter-spacing:.1em}
+#err{display:none;background:rgba(255,95,109,.07);border:1px solid var(--coral);border-radius:12px;padding:18px 24px;color:var(--coral);font-size:.82rem;line-height:1.9;margin:16px 36px}
+#app{display:none}
+.anim{animation:fu .45s ease both}
+@keyframes fu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+/* month heatmap */
+.heatmap-grid{display:grid;gap:6px;margin-top:12px}
+.hm-row{display:grid;gap:6px;align-items:center}
+.hm-label{font-size:.68rem;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.hm-cell{height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:rgba(255,255,255,.85);transition:transform .15s}
+.hm-cell:hover{transform:scale(1.08);z-index:2;position:relative}
+.hm-month-hdr{font-size:.6rem;color:var(--muted2);text-align:center;padding-bottom:2px}
+@media(max-width:1100px){.kpi-row{grid-template-columns:repeat(3,1fr)}.charts-row{grid-template-columns:1fr 1fr}.charts-row-2{grid-template-columns:1fr}.charts-row-3col{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.kpi-row,.kpi-row-3,.kpi-row-4{grid-template-columns:repeat(2,1fr)}.charts-row,.bot-row,.charts-row-2,.charts-row-2col,.charts-row-3col{grid-template-columns:1fr}.mega-prog{grid-template-columns:1fr}}
+@media(max-width:520px){main,header{padding-left:14px;padding-right:14px}h1{font-size:1.8rem}.tab-bar{padding:0 14px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="eyebrow"><div class="live-dot"></div><span class="eyebrow-lbl">Live · Google Sheets</span></div>
+    <h1>Video Solutions <em>Tracker</em></h1>
+    <div class="sub" id="sub-line">Connecting to your sheet…</div>
+  </div>
+  <button id="refresh-btn" onclick="loadAll()">↻ Refresh</button>
+</header>
+
+<div id="loader"><div class="spin"></div><div class="ltxt" id="ltxt">Fetching live data…</div></div>
+<div id="err"></div>
+
+<div id="app">
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('overview')">📊 Overview</button>
+    <button class="tab-btn"        onclick="switchTab('monthly')">📅 Monthly</button>
+    <button class="tab-btn"        onclick="switchTab('faculty')">👨‍🏫 Faculty Wise</button>
+  </div>
+  <main>
+
+    <!-- ══════════ TAB 1: OVERVIEW ══════════ -->
+    <div class="tab-panel active" id="tab-overview">
+      <div class="kpi-row anim" style="animation-delay:.04s">
+        <div class="kc k1"><div class="kt"><div class="kl">Total<br>Entries</div><div class="ki">📁</div></div><div class="kv" id="k-total">–</div><div class="kd">All rows</div></div>
+        <div class="kc k2"><div class="kt"><div class="kl">Videos<br>Required</div><div class="ki">🎬</div></div><div class="kv" id="k-req">–</div><div class="kd">Total to produce</div></div>
+        <div class="kc k3"><div class="kt"><div class="kl">Videos<br>Completed</div><div class="ki">✅</div></div><div class="kv" id="k-done">–</div><div class="kd">Produced so far</div></div>
+        <div class="kc k4"><div class="kt"><div class="kl">Videos<br>Remaining</div><div class="ki">⏳</div></div><div class="kv" id="k-rem">–</div><div class="kd">Still to do</div></div>
+        <div class="kc k5"><div class="kt"><div class="kl">Projects<br>Active</div><div class="ki">📊</div></div><div class="kv" id="k-proj">–</div><div class="kd">Unique projects</div></div>
+      </div>
+      <div class="mega-prog anim" style="animation-delay:.09s">
+        <div>
+          <div class="mp-label">Overall Progress</div>
+          <div class="mp-title">Video Solutions Completion</div>
+          <div class="prog-track"><div class="prog-fill pf-teal" id="pf-main"></div></div>
+          <div class="prog-nums"><span><b id="pn-done">0</b> completed</span><span><b id="pn-req">0</b> required</span></div>
+        </div>
+        <div style="text-align:center"><div class="mp-pct" id="mp-pct">0%<span>completion rate</span></div></div>
+        <div class="mp-stats">
+          <div class="mp-stat"><span class="mp-stat-label">Subjects covered</span><span class="mp-stat-val" id="ms-subj" style="color:var(--blue)">–</span></div>
+          <div class="mp-stat"><span class="mp-stat-label">Avg videos / entry</span><span class="mp-stat-val" id="ms-avg" style="color:var(--yellow)">–</span></div>
+          <div class="mp-stat"><span class="mp-stat-label">Fully done entries</span><span class="mp-stat-val" id="ms-full" style="color:var(--green)">–</span></div>
+        </div>
+      </div>
+      <div class="charts-row anim" style="animation-delay:.14s">
+        <div class="sc"><div class="stitle">Required vs Completed — by Project</div><div class="ssub">Grouped bar comparison</div><div class="cw-tall"><canvas id="c-proj-bar"></canvas></div></div>
+        <div class="sc"><div class="stitle">Tasks by Status</div><div class="ssub">Status distribution</div><div class="cw"><canvas id="c-status"></canvas></div></div>
+        <div class="sc"><div class="stitle">Tasks by Subject</div><div class="ssub">Subject breakdown</div><div class="cw"><canvas id="c-subject"></canvas></div></div>
+      </div>
+      <div class="bot-row anim" style="animation-delay:.19s">
+        <div class="sc"><div class="stitle">Completion % by Project</div><div class="ssub">How far each project has come</div><div class="cw"><canvas id="c-proj-pct"></canvas></div></div>
+        <div class="sc"><div class="stitle">Videos Completed — by Subject</div><div class="ssub">Output across subjects</div><div class="cw"><canvas id="c-subj-done"></canvas></div></div>
+      </div>
+      <div class="sc anim" style="animation-delay:.22s;margin-bottom:18px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:4px">
+          <div>
+            <div class="stitle">Month-wise Completed Video Solutions</div>
+            <div class="ssub">Total videos completed each month across all projects — auto-detected from sheet columns</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" id="ov-month-legend"></div>
+        </div>
+        <div style="position:relative;height:260px"><canvas id="c-monthly-bar"></canvas></div>
+      </div>
+
+      <div class="tbl-sec anim" style="animation-delay:.24s">
+        <div class="tbl-hdr">
+          <div class="tbl-ttl">All Records</div>
+          <div class="ctrl">
+            <input class="sinp" id="s1-search" type="text" placeholder="🔍 Search…" oninput="renderT1()"/>
+            <select id="s1-proj" onchange="renderT1()"><option value="">All Projects</option></select>
+            <select id="s1-subj" onchange="renderT1()"><option value="">All Subjects</option></select>
+            <select id="s1-stat" onchange="renderT1()"><option value="">All Statuses</option></select>
+          </div>
+        </div>
+        <div class="twrap"><table><thead><tr>
+          <th onclick="sortT1(0)">Project <span>↕</span></th>
+          <th onclick="sortT1(1)">Subject <span>↕</span></th>
+          <th onclick="sortT1(2)">Status <span>↕</span></th>
+          <th onclick="sortT1(3)">Required <span>↕</span></th>
+          <th onclick="sortT1(4)">Completed <span>↕</span></th>
+          <th>Progress</th>
+        </tr></thead><tbody id="tb1"></tbody></table></div>
+        <div class="tbl-footer"><span id="rc1">–</span><span>Auto-refreshes every 60s</span></div>
+      </div>
+    </div>
+
+    <!-- ══════════ TAB 2: MONTHLY ══════════ -->
+    <div class="tab-panel" id="tab-monthly">
+      <!-- KPI row -->
+      <div class="kpi-row-4 anim" style="animation-delay:.04s">
+        <div class="kc k6"><div class="kt"><div class="kl">Months<br>Tracked</div><div class="ki">📅</div></div><div class="kv" id="mk-months">–</div><div class="kd">Columns in sheet</div></div>
+        <div class="kc k2"><div class="kt"><div class="kl">Best Month<br>Output</div><div class="ki">🏆</div></div><div class="kv" id="mk-best">–</div><div class="kd" id="mk-best-name">–</div></div>
+        <div class="kc k1"><div class="kt"><div class="kl">Latest Month<br>Completed</div><div class="ki">📆</div></div><div class="kv" id="mk-latest">–</div><div class="kd" id="mk-latest-name">–</div></div>
+        <div class="kc k3"><div class="kt"><div class="kl">Monthly<br>Avg Output</div><div class="ki">📈</div></div><div class="kv" id="mk-avg">–</div><div class="kd">Videos / month</div></div>
+      </div>
+
+      <!-- Month selector pills -->
+      <div class="sc anim" style="animation-delay:.08s;margin-bottom:18px">
+        <div class="stitle">Select Month to Drill Down</div>
+        <div class="ssub">Click a month pill to filter all charts and table below</div>
+        <div class="month-pill-row" id="month-pills"></div>
+      </div>
+
+      <!-- Monthly trend chart -->
+      <div class="charts-row-2col anim" style="animation-delay:.12s">
+        <div class="sc"><div class="stitle">Monthly Output Trend</div><div class="ssub">Total videos completed each month</div><div class="cw-tall"><canvas id="mc-trend"></canvas></div></div>
+        <div class="sc"><div class="stitle">Monthly Share by Subject</div><div class="ssub">Subject contribution per month (stacked)</div><div class="cw-tall"><canvas id="mc-subj-stack"></canvas></div></div>
+      </div>
+
+      <!-- Per-project monthly -->
+      <div class="full-row anim" style="animation-delay:.16s">
+        <div class="sc"><div class="stitle">Monthly Output by Project</div><div class="ssub">How each project contributed across months</div><div class="cw-xl"><canvas id="mc-proj-trend"></canvas></div></div>
+      </div>
+
+      <!-- Heatmap -->
+      <div class="sc anim" style="animation-delay:.20s;margin-bottom:18px">
+        <div class="stitle">Project × Month Heatmap</div>
+        <div class="ssub">Videos completed — darker = higher output</div>
+        <div id="heatmap-container" style="overflow-x:auto"></div>
+      </div>
+
+      <!-- Drill-down section -->
+      <div class="sec-div"><div class="sec-div-line"></div><div class="sec-div-title" id="drill-title">Selected Month Breakdown</div><div class="sec-div-dot"></div><div class="sec-div-line"></div></div>
+      <div class="month-stat-grid" id="month-stat-cards"></div>
+      <div class="charts-row-2col anim" style="animation-delay:.24s">
+        <div class="sc"><div class="stitle" id="mc-drill-title">Month Breakdown by Project</div><div class="ssub">Completed videos in selected month</div><div class="cw-tall"><canvas id="mc-drill-proj"></canvas></div></div>
+        <div class="sc"><div class="stitle">Month Breakdown by Subject</div><div class="ssub">Completed videos by subject</div><div class="cw-tall"><canvas id="mc-drill-subj"></canvas></div></div>
+      </div>
+
+      <!-- Monthly table -->
+      <div class="tbl-sec anim" style="animation-delay:.28s">
+        <div class="tbl-hdr">
+          <div class="tbl-ttl" id="mtbl-title">Monthly Records</div>
+          <div class="ctrl">
+            <input class="sinp" id="sm-search" type="text" placeholder="🔍 Search…" oninput="renderTM()"/>
+            <select id="sm-proj" onchange="renderTM()"><option value="">All Projects</option></select>
+            <select id="sm-subj" onchange="renderTM()"><option value="">All Subjects</option></select>
+            <select id="sm-month" onchange="onMonthSelectChange()"><option value="">All Months</option></select>
+          </div>
+        </div>
+        <div class="twrap"><table id="mtbl-table"><thead id="mtbl-head"></thead><tbody id="tbm"></tbody></table></div>
+        <div class="tbl-footer"><span id="rcm">–</span></div>
+      </div>
+    </div>
+
+    <!-- ══════════ TAB 3: FACULTY WISE ══════════ -->
+    <div class="tab-panel" id="tab-faculty">
+      <div class="kpi-row-3 anim" style="animation-delay:.04s">
+        <div class="kc k1"><div class="kt"><div class="kl">Total<br>Faculties</div><div class="ki">👨‍🏫</div></div><div class="kv" id="fk-total">–</div><div class="kd">Unique members</div></div>
+        <div class="kc k2"><div class="kt"><div class="kl">Total VS<br>Assigned</div><div class="ki">🎬</div></div><div class="kv" id="fk-req">–</div><div class="kd">Across all projects</div></div>
+        <div class="kc k3"><div class="kt"><div class="kl">Total VS<br>Completed</div><div class="ki">✅</div></div><div class="kv" id="fk-done">–</div><div class="kd">Produced so far</div></div>
+      </div>
+      <div class="mega-prog anim" style="animation-delay:.09s">
+        <div>
+          <div class="mp-label">Faculty Output</div>
+          <div class="mp-title">Overall Video Solutions Progress</div>
+          <div class="prog-track"><div class="prog-fill pf-teal" id="fpf-main"></div></div>
+          <div class="prog-nums"><span><b id="fpn-done">0</b> completed</span><span><b id="fpn-req">0</b> assigned</span></div>
+        </div>
+        <div style="text-align:center"><div class="mp-pct" id="fmp-pct">0%<span>completion rate</span></div></div>
+        <div class="mp-stats">
+          <div class="mp-stat"><span class="mp-stat-label">Projects covered</span><span class="mp-stat-val" id="fms-proj" style="color:var(--blue)">–</span></div>
+          <div class="mp-stat"><span class="mp-stat-label">Top faculty</span><span class="mp-stat-val" id="fms-top" style="color:var(--yellow);font-size:.85rem">–</span></div>
+          <div class="mp-stat"><span class="mp-stat-label">100% done faculties</span><span class="mp-stat-val" id="fms-full" style="color:var(--green)">–</span></div>
+        </div>
+      </div>
+      <div class="charts-row-2 anim" style="animation-delay:.14s">
+        <div class="sc"><div class="stitle">Assigned vs Completed — by Faculty</div><div class="ssub">Grouped bar across all projects</div><div class="cw-xl"><canvas id="fc-bar"></canvas></div></div>
+        <div class="sc"><div class="stitle">Completion % by Faculty</div><div class="ssub">Colour coded performance</div><div class="cw-xl"><canvas id="fc-pct"></canvas></div></div>
+      </div>
+      <div class="bot-row anim" style="animation-delay:.18s">
+        <div class="sc"><div class="stitle">Videos by Project</div><div class="ssub">Faculty load per project</div><div class="cw"><canvas id="fc-proj"></canvas></div></div>
+        <div class="sc"><div class="stitle">Faculty Task Share</div><div class="ssub">Distribution of assigned work</div><div class="cw"><canvas id="fc-donut"></canvas></div></div>
+      </div>
+      <div class="sec-div"><div class="sec-div-line"></div><div class="sec-div-title">Faculty Performance Cards</div><div class="sec-div-dot"></div><div class="sec-div-line"></div></div>
+      <div class="faculty-grid" id="fac-cards"></div>
+      <div class="tbl-sec anim" style="animation-delay:.24s">
+        <div class="tbl-hdr">
+          <div class="tbl-ttl">Faculty Detail Records</div>
+          <div class="ctrl">
+            <input class="sinp" id="s2-search" type="text" placeholder="🔍 Search faculty…" oninput="renderT2()"/>
+            <select id="s2-proj" onchange="renderT2()"><option value="">All Projects</option></select>
+            <select id="s2-subj" onchange="renderT2()"><option value="">All Subjects</option></select>
+          </div>
+        </div>
+        <div class="twrap"><table><thead><tr>
+          <th onclick="sortT2(0)">Faculty <span>↕</span></th>
+          <th onclick="sortT2(1)">Project <span>↕</span></th>
+          <th onclick="sortT2(2)">Subject / Chapter <span>↕</span></th>
+          <th onclick="sortT2(3)">Assigned VS <span>↕</span></th>
+          <th onclick="sortT2(4)">Completed VS <span>↕</span></th>
+          <th>Progress</th>
+        </tr></thead><tbody id="tb2"></tbody></table></div>
+        <div class="tbl-footer"><span id="rc2">–</span></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ─── CONFIG ───────────────────────────────────────────────
+const SHEET_ID = '1D80kh-8ypS0adpH1RRSl4Nb2IbBB93_DdHeslbgzm9Y';
+const GID_S1   = '0';
+const GID_S2   = '679296378';
+// ──────────────────────────────────────────────────────────
+
+const COLORS = ['#00d4aa','#f5c842','#ff5f6d','#4db8ff','#b48ef7','#ff9a3c','#3ddc97','#f472b6','#facc15','#60a5fa','#c084fc','#f87171'];
+const k = s => (s||'').toLowerCase().replace(/[\s_\-\/\(\)\.]/g,'');
+
+const SKIP_VALS = new Set(['classxi','classxii','classx','classix','classviii','class-xi','class-xii','class-x','class','section','','classxi']);
+
+let s1Rows=[], facRows=[], charts={};
+let monthCols=[];   // [{label:'April', idx:5}, {label:'May', idx:6}, ...]
+let activeMonth=''; // '' = all months
+let sc1=-1,sa1=true, sc2=-1,sa2=true;
+
+// ─── TAB ───────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelector(`.tab-btn[onclick*="${tab}"]`).classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+
+// ─── FETCH ─────────────────────────────────────────────────
+async function fetchGviz(gid) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${gid}&_=${Date.now()}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('HTTP '+res.status);
+  const txt = await res.text();
+  return JSON.parse(txt.substring(txt.indexOf('{'), txt.lastIndexOf('}')+1));
+}
+
+async function loadAll() {
+  document.getElementById('loader').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('err').style.display='none';
+  try {
+    document.getElementById('ltxt').textContent='Loading Sheet 1 (Overview)…';
+    const j1 = await fetchGviz(GID_S1);
+    parseSheet1(j1);
+
+    document.getElementById('ltxt').textContent='Loading Sheet 2 (Faculty)…';
+    const j2 = await fetchGviz(GID_S2);
+    parseSheet2(j2);
+
+    document.getElementById('loader').style.display='none';
+    document.getElementById('app').style.display='block';
+    document.getElementById('sub-line').innerHTML=
+      `Last updated: <b>${new Date().toLocaleTimeString()}</b> · Auto-refreshes every 60s`;
+    buildOverview();
+    buildMonthly();
+    buildFaculty();
+  } catch(e) { showErr(e.message); }
+}
+
+// ─── PARSE SHEET 1 ─────────────────────────────────────────
+// Columns: Project(0) Subject(1) Status(2) Required(3) Completed(4) [Month cols 5+]
+function parseSheet1(json) {
+  const t = json.table;
+  if (!t||!t.rows) throw new Error('Sheet 1 empty');
+
+  // Detect month columns from headers
+  const colLabels = (t.cols||[]).map(c=>(c.label||c.id||'').trim());
+  monthCols = [];
+  for (let i=5; i<colLabels.length; i++) {
+    const lbl = colLabels[i];
+    // Expecting pattern like "Video solutions completed (April)"
+    const m = lbl.match(/\(([^)]+)\)/);
+    if (m) monthCols.push({label: m[1].trim(), idx: i});
+    else if (lbl && !lbl.match(/^[A-Z]$/)) {
+      // fallback: use the whole label if it looks like a month name
+      const months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec',
+                      'january','february','march','april','may','june','july','august',
+                      'september','october','november','december'];
+      if (months.some(mn => lbl.toLowerCase().includes(mn))) {
+        monthCols.push({label: lbl.replace(/video\s*solutions?\s*completed\s*/gi,'').replace(/[()]/g,'').trim() || lbl, idx: i});
+      }
+    }
+  }
+
+  s1Rows = (t.rows||[]).map(r => {
+    const c = cells(r);
+    const row = {
+      project: (c[0]||'').trim(),
+      subject: (c[1]||'').trim(),
+      status:  (c[2]||'').trim(),
+      req:     num(c[3]),
+      done:    num(c[4]),
+      months:  {}
+    };
+    monthCols.forEach(mc => { row.months[mc.label] = num(c[mc.idx]); });
+    return row;
+  }).filter(r => r.project||r.subject);
+}
+
+// ─── PARSE SHEET 2 ─────────────────────────────────────────
+function parseSheet2(json) {
+  facRows = [];
+  const t = json.table;
+  if (!t) return;
+  const colLabels = (t.cols||[]).map(c => (c.label||c.id||'').trim());
+  const groups = [];
+  for (let c = 0; c < colLabels.length; c++) {
+    const lk = k(colLabels[c]);
+    if (lk === 'faculties' || lk === 'faculty') {
+      const chLabel = colLabels[c-1] || '';
+      const projName = chLabel
+        .replace(/\bchapter\s*name\b/gi, '')
+        .replace(/\bsubject\b/gi, '')
+        .trim();
+      groups.push({
+        project: projName || `Project_col${c}`,
+        subjectCol: c - 1,
+        facultyCol: c,
+        reqCol:     c + 1,
+        doneCol:    c + 2
+      });
+    }
+  }
+  const rawRows = (t.rows||[]).map(r => cells(r));
+  for (const row of rawRows) {
+    for (const g of groups) {
+      const faculty = (row[g.facultyCol] || '').trim();
+      const req     = num(row[g.reqCol]);
+      const done    = num(row[g.doneCol]);
+      const subject = g.subjectCol >= 0 ? (row[g.subjectCol] || '').trim() : '';
+      if (!faculty) continue;
+      if (SKIP_VALS.has(k(faculty))) continue;
+      if (req === 0 && done === 0) continue;
+      facRows.push({ faculty, project: g.project, subject, req, done });
+    }
+  }
+}
+
+// ─── HELPERS ───────────────────────────────────────────────
+function cells(r) {
+  return (r.c||[]).map(cell => {
+    if (!cell) return '';
+    if (cell.f) return cell.f;
+    if (cell.v===null||cell.v===undefined) return '';
+    return String(cell.v).trim();
+  });
+}
+function num(v)    { const n=parseFloat(v||0); return isNaN(n)?0:n; }
+function pctClr(p) { return p>=80?'var(--teal)':p>=50?'var(--blue)':p>=20?'var(--yellow)':'var(--coral)'; }
+function pctBg(p)  { return p>=80?'rgba(0,212,170,.75)':p>=50?'rgba(77,184,255,.75)':p>=20?'rgba(245,200,66,.75)':'rgba(255,95,109,.75)'; }
+function heatBg(v, max) {
+  if (!max||!v) return 'rgba(28,45,66,.6)';
+  const ratio = v/max;
+  if (ratio>0.75) return 'rgba(0,212,170,.85)';
+  if (ratio>0.5)  return 'rgba(77,184,255,.75)';
+  if (ratio>0.25) return 'rgba(245,200,66,.65)';
+  return 'rgba(255,95,109,.55)';
+}
+function showErr(msg) {
+  document.getElementById('loader').style.display='none';
+  const e=document.getElementById('err');
+  e.innerHTML=`⚠ Could not load: <strong>${msg}</strong><br><br>
+    Go to Google Sheet → <strong>File → Share → Publish to web</strong> → Publish.<br>
+    Also confirm sharing = "Anyone with the link → Viewer".`;
+  e.style.display='block';
+}
+function popSel(id, vals) {
+  const s=document.getElementById(id); if(!s)return;
+  while(s.options.length>1) s.remove(1);
+  vals.forEach(v=>s.add(new Option(v,v)));
+}
+function mkChart(ckey,id,type,data,opts) {
+  if(charts[ckey]) charts[ckey].destroy();
+  const el=document.getElementById(id); if(!el)return;
+  charts[ckey]=new Chart(id,{type,data,options:opts});
+}
+
+const BASE={responsive:true,maintainAspectRatio:false,animation:{duration:900},
+  plugins:{legend:{labels:{color:'#607d9b',font:{size:11},boxWidth:10,padding:12}}}};
+const DKS={
+  x:{ticks:{color:'#3a526b',font:{size:10}},grid:{color:'rgba(28,45,66,.9)'}},
+  y:{ticks:{color:'#3a526b',font:{size:10}},grid:{color:'rgba(28,45,66,.9)'}}
+};
+
+// ─── BUILD OVERVIEW ────────────────────────────────────────
+function buildOverview() {
+  const rows=s1Rows;
+  const tReq=rows.reduce((s,r)=>s+r.req,0);
+  const tDon=rows.reduce((s,r)=>s+r.done,0);
+  const pct=tReq>0?Math.round(tDon/tReq*100):0;
+  const projs=[...new Set(rows.map(r=>r.project).filter(Boolean))];
+  const subjs=[...new Set(rows.map(r=>r.subject).filter(Boolean))];
+  const full=rows.filter(r=>r.req>0&&r.done>=r.req).length;
+
+  document.getElementById('k-total').textContent=rows.length;
+  document.getElementById('k-req').textContent=tReq;
+  document.getElementById('k-done').textContent=tDon;
+  document.getElementById('k-rem').textContent=Math.max(0,tReq-tDon);
+  document.getElementById('k-proj').textContent=projs.length;
+  setTimeout(()=>{
+    document.getElementById('pf-main').style.width=pct+'%';
+    document.getElementById('mp-pct').innerHTML=pct+'%<span>completion rate</span>';
+    document.getElementById('pn-done').textContent=tDon;
+    document.getElementById('pn-req').textContent=tReq;
+    document.getElementById('ms-subj').textContent=subjs.length;
+    document.getElementById('ms-avg').textContent=rows.length>0?(tReq/rows.length).toFixed(1):'–';
+    document.getElementById('ms-full').textContent=full;
+  },300);
+
+  popSel('s1-proj',projs.sort());
+  popSel('s1-subj',subjs.sort());
+  popSel('s1-stat',[...new Set(rows.map(r=>r.status).filter(Boolean))].sort());
+
+  const pR={},pD={};
+  rows.forEach(r=>{if(!r.project)return;pR[r.project]=(pR[r.project]||0)+r.req;pD[r.project]=(pD[r.project]||0)+r.done;});
+  const pK=Object.keys(pR).sort();
+  mkChart('pb','c-proj-bar','bar',{labels:pK,datasets:[
+    {label:'Required', data:pK.map(k=>pR[k]),backgroundColor:'rgba(77,184,255,.7)',borderRadius:5,borderSkipped:false},
+    {label:'Completed',data:pK.map(k=>pD[k]),backgroundColor:'rgba(0,212,170,.7)', borderRadius:5,borderSkipped:false}
+  ]},{...BASE,scales:DKS});
+
+  const stC={};rows.forEach(r=>{if(r.status)stC[r.status]=(stC[r.status]||0)+1;});
+  mkChart('st','c-status','doughnut',{labels:Object.keys(stC),datasets:[{data:Object.values(stC),backgroundColor:COLORS,borderWidth:0,hoverOffset:10}]},
+    {...BASE,cutout:'63%',plugins:{legend:{position:'bottom',labels:{color:'#607d9b',font:{size:10},boxWidth:10,padding:8}}}});
+
+  const suC={};rows.forEach(r=>{if(r.subject)suC[r.subject]=(suC[r.subject]||0)+1;});
+  mkChart('su','c-subject','doughnut',{labels:Object.keys(suC),datasets:[{data:Object.values(suC),backgroundColor:COLORS,borderWidth:0,hoverOffset:10}]},
+    {...BASE,cutout:'63%',plugins:{legend:{position:'bottom',labels:{color:'#607d9b',font:{size:10},boxWidth:10,padding:8}}}});
+
+  const pp=pK.map(k=>pR[k]>0?Math.round(pD[k]/pR[k]*100):0);
+  mkChart('pp','c-proj-pct','bar',{labels:pK,datasets:[{label:'% Complete',data:pp,backgroundColor:pp.map(pctBg),borderRadius:6,borderSkipped:false}]},
+    {...BASE,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{...DKS.x,max:100,ticks:{...DKS.x.ticks,callback:v=>v+'%'}},y:DKS.y}});
+
+  const suD={};rows.forEach(r=>{if(r.subject)suD[r.subject]=(suD[r.subject]||0)+r.done;});
+  const suK=Object.keys(suD).sort((a,b)=>suD[b]-suD[a]).slice(0,10);
+  mkChart('sd','c-subj-done','bar',{labels:suK,datasets:[{label:'Completed',data:suK.map(k=>suD[k]),backgroundColor:COLORS,borderRadius:6,borderSkipped:false}]},
+    {...BASE,indexAxis:'y',plugins:{legend:{display:false}},scales:DKS});
+
+  // ── Month-wise bar chart in Overview ──────────────────────
+  if (monthCols.length) {
+    const mLabels  = monthCols.map(m => m.label);
+    const mTotals  = monthCols.map(mc => rows.reduce((s,r) => s+(r.months[mc.label]||0), 0));
+    const mMax     = Math.max(...mTotals);
+
+    // Build per-project stacked datasets so the chart also shows project breakdown
+    const ovProjs  = [...new Set(rows.map(r=>r.project).filter(Boolean))];
+    const ovDatasets = ovProjs.map((proj,i) => ({
+      label: proj,
+      data: monthCols.map(mc => rows.filter(r=>r.project===proj).reduce((s,r)=>s+(r.months[mc.label]||0),0)),
+      backgroundColor: COLORS[i % COLORS.length] + 'cc',
+      borderColor:     COLORS[i % COLORS.length],
+      borderWidth: 1,
+      borderRadius: 4,
+      borderSkipped: false
+    }));
+
+    mkChart('ovmonth','c-monthly-bar','bar',{
+      labels: mLabels,
+      datasets: ovDatasets
+    },{
+      ...BASE,
+      scales: {
+        x: { ...DKS.x, stacked: true },
+        y: { ...DKS.y, stacked: true,
+             ticks: { ...DKS.y.ticks, callback: v => v.toLocaleString() } }
+      },
+      plugins: {
+        legend: { position:'bottom', labels:{color:'#607d9b',font:{size:10},boxWidth:10,padding:10} },
+        tooltip: {
+          callbacks: {
+            footer: (items) => {
+              const total = items.reduce((s,i)=>s+i.parsed.y,0);
+              return `Total: ${total.toLocaleString()}`;
+            }
+          }
+        }
+      }
+    });
+
+    // Render small legend badges showing total per month
+    const legendEl = document.getElementById('ov-month-legend');
+    if (legendEl) {
+      legendEl.innerHTML = mLabels.map((lbl,i) => {
+        const v = mTotals[i];
+        const pct = mMax > 0 ? Math.round(v/mMax*100) : 0;
+        const clr = pct>=80?'var(--teal)':pct>=50?'var(--blue)':pct>=20?'var(--yellow)':'var(--coral)';
+        return `<div style="display:flex;flex-direction:column;align-items:center;background:var(--card2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;min-width:64px">
+          <span style="font-family:var(--fd);font-size:1rem;font-weight:900;color:${clr};line-height:1">${v.toLocaleString()}</span>
+          <span style="font-size:.58rem;color:var(--muted2);margin-top:2px;letter-spacing:.05em;text-transform:uppercase">${lbl}</span>
+        </div>`;
+      }).join('');
+    }
+  } else {
+    // No month cols yet — show placeholder
+    const el = document.getElementById('c-monthly-bar');
+    if (el) {
+      const ctx = el.getContext('2d');
+      ctx.fillStyle = '#3a526b';
+      ctx.font = '13px DM Sans, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('No monthly columns found in sheet yet', el.width/2, el.height/2);
+    }
+  }
+
+  renderT1();
+}
+
+// ─── BUILD MONTHLY ─────────────────────────────────────────
+function buildMonthly() {
+  if (!monthCols.length) {
+    document.getElementById('tab-monthly').innerHTML =
+      '<div style="padding:40px 36px;text-align:center;color:var(--muted2)">No monthly columns detected in the sheet yet.<br>Add columns named <b style="color:var(--yellow)">Video solutions completed (Month)</b> to Sheet 1.</div>';
+    return;
+  }
+
+  const mLabels = monthCols.map(m=>m.label);
+
+  // KPIs
+  const mTotals = monthCols.map(mc => s1Rows.reduce((s,r)=>s+(r.months[mc.label]||0),0));
+  const bestIdx = mTotals.indexOf(Math.max(...mTotals));
+  const latestIdx = mTotals.length - 1;
+  const mAvg = mTotals.length ? Math.round(mTotals.reduce((a,b)=>a+b,0)/mTotals.length) : 0;
+
+  document.getElementById('mk-months').textContent = monthCols.length;
+  document.getElementById('mk-best').textContent = mTotals[bestIdx]||0;
+  document.getElementById('mk-best-name').textContent = mLabels[bestIdx]||'–';
+  document.getElementById('mk-latest').textContent = mTotals[latestIdx]||0;
+  document.getElementById('mk-latest-name').textContent = mLabels[latestIdx]||'–';
+  document.getElementById('mk-avg').textContent = mAvg;
+
+  // Month pills
+  const pillRow = document.getElementById('month-pills');
+  pillRow.innerHTML = '';
+  const allPill = document.createElement('button');
+  allPill.className = 'month-pill active';
+  allPill.textContent = 'All Months';
+  allPill.onclick = () => setActiveMonth('');
+  pillRow.appendChild(allPill);
+  mLabels.forEach(lbl => {
+    const btn = document.createElement('button');
+    btn.className = 'month-pill';
+    btn.textContent = lbl;
+    btn.dataset.month = lbl;
+    btn.onclick = () => setActiveMonth(lbl);
+    pillRow.appendChild(btn);
+  });
+
+  // Populate month filter in table
+  popSel('sm-proj', [...new Set(s1Rows.map(r=>r.project).filter(Boolean))].sort());
+  popSel('sm-subj', [...new Set(s1Rows.map(r=>r.subject).filter(Boolean))].sort());
+  popSel('sm-month', mLabels);
+
+  // Trend chart (all months)
+  mkChart('mtrend','mc-trend','bar',{
+    labels: mLabels,
+    datasets:[{
+      label:'Videos Completed',
+      data: mTotals,
+      backgroundColor: mLabels.map((_,i)=>COLORS[i%COLORS.length]+'cc'),
+      borderRadius:6, borderSkipped:false
+    }]
+  },{...BASE,plugins:{legend:{display:false}},scales:DKS});
+
+  // Stacked subject chart
+  const allSubjs = [...new Set(s1Rows.map(r=>r.subject).filter(Boolean))];
+  const subjDatasets = allSubjs.map((subj,i) => ({
+    label: subj,
+    data: monthCols.map(mc => s1Rows.filter(r=>r.subject===subj).reduce((s,r)=>s+(r.months[mc.label]||0),0)),
+    backgroundColor: COLORS[i%COLORS.length]+'bb',
+    borderRadius: 3, borderSkipped: false
+  }));
+  mkChart('msubjstack','mc-subj-stack','bar',{
+    labels: mLabels,
+    datasets: subjDatasets
+  },{...BASE,scales:{...DKS,x:{...DKS.x,stacked:true},y:{...DKS.y,stacked:true}},
+    plugins:{legend:{labels:{color:'#607d9b',font:{size:10},boxWidth:10,padding:8}}}});
+
+  // Per-project monthly trend
+  const allProjs = [...new Set(s1Rows.map(r=>r.project).filter(Boolean))];
+  const projDatasets = allProjs.map((proj,i) => ({
+    label: proj,
+    data: monthCols.map(mc => s1Rows.filter(r=>r.project===proj).reduce((s,r)=>s+(r.months[mc.label]||0),0)),
+    backgroundColor: COLORS[i%COLORS.length]+'99',
+    borderColor: COLORS[i%COLORS.length],
+    fill: false, tension: 0.4,
+    borderWidth: 2, pointRadius: 4
+  }));
+  mkChart('mprojtrend','mc-proj-trend','line',{
+    labels: mLabels,
+    datasets: projDatasets
+  },{...BASE,scales:DKS,plugins:{legend:{labels:{color:'#607d9b',font:{size:10},boxWidth:10,padding:8}}}});
+
+  buildHeatmap();
+  buildDrillDown(activeMonth || mLabels[mLabels.length-1]);
+  renderTM();
+}
+
+function buildHeatmap() {
+  const container = document.getElementById('heatmap-container');
+  if (!container || !monthCols.length) return;
+  const projs = [...new Set(s1Rows.map(r=>r.project).filter(Boolean))];
+  const mLabels = monthCols.map(m=>m.label);
+
+  // Build matrix
+  const matrix = {}; // matrix[proj][month] = total
+  let globalMax = 0;
+  projs.forEach(proj => {
+    matrix[proj] = {};
+    mLabels.forEach(mo => {
+      const val = s1Rows.filter(r=>r.project===proj).reduce((s,r)=>s+(r.months[mo]||0),0);
+      matrix[proj][mo] = val;
+      if (val > globalMax) globalMax = val;
+    });
+  });
+
+  const cellW = Math.max(60, Math.floor((window.innerWidth - 300) / mLabels.length));
+
+  let html = `<div style="display:grid;grid-template-columns:180px ${mLabels.map(()=>cellW+'px').join(' ')};gap:4px;min-width:${180+cellW*mLabels.length+4*mLabels.length}px;padding:8px 0">`;
+  // header row
+  html += `<div></div>`;
+  mLabels.forEach(mo => {
+    html += `<div class="hm-month-hdr" style="text-align:center;font-size:.6rem;color:var(--muted2);padding-bottom:4px">${mo}</div>`;
+  });
+  // data rows
+  projs.forEach(proj => {
+    html += `<div class="hm-label" style="display:flex;align-items:center;padding-right:8px;font-size:.65rem">${proj}</div>`;
+    mLabels.forEach(mo => {
+      const v = matrix[proj][mo];
+      const bg = heatBg(v, globalMax);
+      const txt = v > 0 ? v : '';
+      html += `<div class="hm-cell" style="background:${bg};height:28px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:rgba(255,255,255,.9)" title="${proj} · ${mo}: ${v}">${txt}</div>`;
+    });
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function setActiveMonth(month) {
+  activeMonth = month;
+  document.querySelectorAll('.month-pill').forEach(p => {
+    p.classList.toggle('active', p.dataset.month === month || (month===''&&p.textContent==='All Months'));
+  });
+  // sync select
+  const sel = document.getElementById('sm-month');
+  if (sel) sel.value = month;
+  if (month) {
+    buildDrillDown(month);
+  } else {
+    buildDrillDown(monthCols[monthCols.length-1]?.label || '');
+  }
+  renderTM();
+}
+
+function onMonthSelectChange() {
+  const val = document.getElementById('sm-month').value;
+  setActiveMonth(val);
+}
+
+function buildDrillDown(month) {
+  if (!month) return;
+  document.getElementById('drill-title').textContent = `${month} — Breakdown`;
+  document.getElementById('mc-drill-title').textContent = `${month}: Completed by Project`;
+  document.getElementById('mtbl-title').textContent = `Monthly Records${activeMonth ? ' — '+activeMonth : ''}`;
+
+  const rows = s1Rows.filter(r => r.months[month] !== undefined);
+  const total = rows.reduce((s,r)=>s+(r.months[month]||0),0);
+
+  // KPI stat cards for drill-down
+  const projs = [...new Set(rows.map(r=>r.project).filter(Boolean))];
+  const subjs = [...new Set(rows.map(r=>r.subject).filter(Boolean))];
+  const bestProj = projs.sort((a,b)=>
+    rows.filter(r=>r.project===b).reduce((s,r)=>s+r.months[month],0) -
+    rows.filter(r=>r.project===a).reduce((s,r)=>s+r.months[month],0)
+  )[0] || '–';
+
+  const cards = [
+    {label:'Total Completed', val: total, sub: `in ${month}`},
+    {label:'Projects Active', val: projs.length, sub: 'contributing projects'},
+    {label:'Top Project', val: bestProj, sub: 'most output', small:true},
+    {label:'Subjects Active', val: subjs.length, sub: 'unique subjects'},
+  ];
+  const grid = document.getElementById('month-stat-cards');
+  grid.innerHTML = cards.map(c=>`
+    <div class="month-stat-card">
+      <div class="msc-label">${c.label}</div>
+      <div class="msc-val" style="${c.small?'font-size:1.1rem;':''}">${c.val}</div>
+      <div class="msc-sub">${c.sub}</div>
+    </div>`).join('');
+
+  // Drill-down: by project
+  const projTotals = {};
+  rows.forEach(r=>{if(r.project) projTotals[r.project]=(projTotals[r.project]||0)+(r.months[month]||0);});
+  const pK = Object.keys(projTotals).sort((a,b)=>projTotals[b]-projTotals[a]);
+  mkChart('mdrillp','mc-drill-proj','bar',{
+    labels: pK,
+    datasets:[{label:'Completed', data:pK.map(k=>projTotals[k]), backgroundColor:pK.map((_,i)=>COLORS[i%COLORS.length]+'bb'), borderRadius:6, borderSkipped:false}]
+  },{...BASE,indexAxis:'y',plugins:{legend:{display:false}},scales:DKS});
+
+  // Drill-down: by subject
+  const subjTotals = {};
+  rows.forEach(r=>{if(r.subject) subjTotals[r.subject]=(subjTotals[r.subject]||0)+(r.months[month]||0);});
+  const sK = Object.keys(subjTotals).sort((a,b)=>subjTotals[b]-subjTotals[a]);
+  mkChart('mdrills','mc-drill-subj','bar',{
+    labels: sK,
+    datasets:[{label:'Completed', data:sK.map(k=>subjTotals[k]), backgroundColor:sK.map((_,i)=>COLORS[i%COLORS.length]+'bb'), borderRadius:6, borderSkipped:false}]
+  },{...BASE,indexAxis:'y',plugins:{legend:{display:false}},scales:DKS});
+}
+
+// ─── TABLE MONTHLY ─────────────────────────────────────────
+function renderTM() {
+  const fP=(document.getElementById('sm-proj')||{}).value||'';
+  const fS=(document.getElementById('sm-subj')||{}).value||'';
+  const sq=((document.getElementById('sm-search')||{}).value||'').toLowerCase();
+  const fM = activeMonth;
+
+  // Build dynamic header
+  const head = document.getElementById('mtbl-head');
+  if (head) {
+    const displayMonths = fM ? monthCols.filter(m=>m.label===fM) : monthCols;
+    head.innerHTML = '<tr>' +
+      '<th>Project</th><th>Subject</th><th>Status</th><th>Required</th><th>Total Done</th>' +
+      displayMonths.map(m=>`<th>${m.label}</th>`).join('') +
+      '<th>Progress</th></tr>';
+  }
+
+  let data = s1Rows.filter(r => {
+    if (fP && r.project!==fP) return false;
+    if (fS && r.subject!==fS) return false;
+    if (sq && !(r.project+r.subject+r.status).toLowerCase().includes(sq)) return false;
+    return true;
+  });
+
+  const displayMonths = fM ? monthCols.filter(m=>m.label===fM) : monthCols;
+  const tb = document.getElementById('tbm'); tb.innerHTML='';
+  data.forEach(r => {
+    const p = r.req>0?Math.round(r.done/r.req*100):0;
+    const fc = pctClr(p);
+    const mCells = displayMonths.map(mc => {
+      const v = r.months[mc.label]||0;
+      return `<td style="color:${v>0?'var(--orange)':'var(--muted)'};font-weight:${v>0?'600':'400'}">${v||'–'}</td>`;
+    }).join('');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="wc">${r.project||'–'}</td><td class="wc">${r.subject||'–'}</td>
+      <td><span class="badge b-${k(r.status)}">${r.status||'–'}</span></td>
+      <td style="color:var(--blue);font-weight:600">${r.req}</td>
+      <td style="color:var(--teal);font-weight:600">${r.done}</td>
+      ${mCells}
+      <td><div class="tprog"><div class="tprog-track"><div class="tprog-fill" style="width:${p}%;background:${fc}"></div></div><span class="tprog-lbl">${p}%</span></div></td>`;
+    tb.appendChild(tr);
+  });
+  const rc=document.getElementById('rcm');
+  if(rc) rc.textContent=`Showing ${data.length} of ${s1Rows.length} records${fM?' · '+fM:''}`;
+}
+
+// ─── BUILD FACULTY ─────────────────────────────────────────
+function buildFaculty() {
+  const rows = facRows;
+  if (!rows.length) {
+    document.getElementById('fac-cards').innerHTML =
+      '<div style="grid-column:1/-1;padding:32px;text-align:center;color:var(--muted2);font-size:.85rem">No faculty data could be extracted from Sheet 2.<br>Please ensure the sheet is published to web.</div>';
+    return;
+  }
+  const fMap={};
+  rows.forEach(r=>{
+    if(!fMap[r.faculty]) fMap[r.faculty]={req:0,done:0,projects:new Set()};
+    fMap[r.faculty].req+=r.req;
+    fMap[r.faculty].done+=r.done;
+    fMap[r.faculty].projects.add(r.project);
+  });
+  const fNames=Object.keys(fMap).sort((a,b)=>fMap[b].req-fMap[a].req);
+  const tFReq=rows.reduce((s,r)=>s+r.req,0);
+  const tFDon=rows.reduce((s,r)=>s+r.done,0);
+  const fPct=tFReq>0?Math.round(tFDon/tFReq*100):0;
+  const projs=[...new Set(rows.map(r=>r.project).filter(Boolean))];
+  const topF=fNames.slice().sort((a,b)=>fMap[b].done-fMap[a].done)[0]||'–';
+  const fullF=fNames.filter(f=>fMap[f].req>0&&fMap[f].done>=fMap[f].req).length;
+
+  document.getElementById('fk-total').textContent=fNames.length;
+  document.getElementById('fk-req').textContent=tFReq;
+  document.getElementById('fk-done').textContent=tFDon;
+  setTimeout(()=>{
+    document.getElementById('fpf-main').style.width=fPct+'%';
+    document.getElementById('fmp-pct').innerHTML=fPct+'%<span>completion rate</span>';
+    document.getElementById('fpn-done').textContent=tFDon;
+    document.getElementById('fpn-req').textContent=tFReq;
+    document.getElementById('fms-proj').textContent=projs.length;
+    document.getElementById('fms-top').textContent=topF;
+    document.getElementById('fms-full').textContent=fullF;
+  },300);
+
+  popSel('s2-proj',projs.sort());
+  popSel('s2-subj',[...new Set(rows.map(r=>r.subject).filter(Boolean))].sort());
+
+  mkChart('fb','fc-bar','bar',{labels:fNames,datasets:[
+    {label:'Assigned',  data:fNames.map(f=>fMap[f].req),  backgroundColor:'rgba(77,184,255,.7)',  borderRadius:4,borderSkipped:false},
+    {label:'Completed', data:fNames.map(f=>fMap[f].done), backgroundColor:'rgba(0,212,170,.7)',  borderRadius:4,borderSkipped:false}
+  ]},{...BASE,scales:DKS});
+
+  const fPcts=fNames.map(f=>fMap[f].req>0?Math.round(fMap[f].done/fMap[f].req*100):0);
+  mkChart('fpct','fc-pct','bar',{labels:fNames,datasets:[{label:'% Done',data:fPcts,backgroundColor:fPcts.map(pctBg),borderRadius:5,borderSkipped:false}]},
+    {...BASE,indexAxis:'y',plugins:{legend:{display:false}},scales:{x:{...DKS.x,max:100,ticks:{...DKS.x.ticks,callback:v=>v+'%'}},y:DKS.y}});
+
+  const pMap={};
+  rows.forEach(r=>{if(!pMap[r.project])pMap[r.project]={req:0,done:0};pMap[r.project].req+=r.req;pMap[r.project].done+=r.done;});
+  const pK=Object.keys(pMap).sort();
+  mkChart('fproj','fc-proj','bar',{labels:pK,datasets:[
+    {label:'Assigned',  data:pK.map(k=>pMap[k].req),  backgroundColor:'rgba(180,142,247,.7)',borderRadius:4,borderSkipped:false},
+    {label:'Completed', data:pK.map(k=>pMap[k].done), backgroundColor:'rgba(61,220,151,.7)', borderRadius:4,borderSkipped:false}
+  ]},{...BASE,scales:DKS});
+
+  mkChart('fdnt','fc-donut','doughnut',{labels:fNames,datasets:[{data:fNames.map(f=>fMap[f].req),backgroundColor:COLORS,borderWidth:0,hoverOffset:10}]},
+    {...BASE,cutout:'60%',plugins:{legend:{position:'bottom',labels:{color:'#607d9b',font:{size:10},boxWidth:10,padding:8}}}});
+
+  const grid=document.getElementById('fac-cards'); grid.innerHTML='';
+  fNames.forEach((name,i)=>{
+    const fm=fMap[name];
+    const p=fm.req>0?Math.round(fm.done/fm.req*100):0;
+    const clr=pctClr(p);
+    const d=document.createElement('div');
+    d.className='fc-card'; d.style.animationDelay=(i*0.03)+'s';
+    d.innerHTML=`
+      <div class="fc-name">${name}</div>
+      <div class="fc-proj">${[...fm.projects].join(' · ')}</div>
+      <div class="fc-nums">
+        <div class="fc-num"><div class="fc-num-v" style="color:var(--blue)">${fm.req}</div><div class="fc-num-l">Assigned</div></div>
+        <div class="fc-num"><div class="fc-num-v" style="color:var(--teal)">${fm.done}</div><div class="fc-num-l">Completed</div></div>
+        <div class="fc-num"><div class="fc-num-v" style="color:${clr}">${p}%</div><div class="fc-num-l">Done</div></div>
+      </div>
+      <div class="fc-bar"><div class="fc-bar-fill" style="width:${p}%;background:${clr}"></div></div>
+      <div class="fc-pct-lbl">${fm.done} of ${fm.req} videos completed</div>`;
+    grid.appendChild(d);
+  });
+  renderT2();
+}
+
+// ─── TABLE 1 ───────────────────────────────────────────────
+function sortT1(col){sa1=sc1===col?!sa1:true;sc1=col;
+  document.querySelectorAll('#tab-overview thead th').forEach((th,i)=>{th.classList.toggle('sorted',i===col);const sp=th.querySelector('span');if(sp)sp.textContent=i===col?(sa1?'↑':'↓'):'↕';});
+  renderT1();}
+function renderT1(){
+  const fP=(document.getElementById('s1-proj')||{}).value||'';
+  const fS=(document.getElementById('s1-subj')||{}).value||'';
+  const fSt=(document.getElementById('s1-stat')||{}).value||'';
+  const sq=((document.getElementById('s1-search')||{}).value||'').toLowerCase();
+  let data=s1Rows.filter(r=>{
+    if(fP&&r.project!==fP)return false;
+    if(fS&&r.subject!==fS)return false;
+    if(fSt&&r.status!==fSt)return false;
+    if(sq&&!(r.project+r.subject+r.status).toLowerCase().includes(sq))return false;
+    return true;
+  });
+  if(sc1>=0) data=[...data].sort((a,b)=>{
+    const av=[a.project,a.subject,a.status,a.req,a.done][sc1]??'';
+    const bv=[b.project,b.subject,b.status,b.req,b.done][sc1]??'';
+    const na=parseFloat(av),nb=parseFloat(bv);
+    const c=(!isNaN(na)&&!isNaN(nb))?na-nb:String(av).localeCompare(String(bv));
+    return sa1?c:-c;
+  });
+  const tb=document.getElementById('tb1');tb.innerHTML='';
+  data.forEach(r=>{
+    const p=r.req>0?Math.round(r.done/r.req*100):0;
+    const fc=pctClr(p);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td class="wc">${r.project||'–'}</td><td class="wc">${r.subject||'–'}</td>
+      <td><span class="badge b-${k(r.status)}">${r.status||'–'}</span></td>
+      <td style="color:var(--blue);font-weight:600">${r.req}</td>
+      <td style="color:var(--teal);font-weight:600">${r.done}</td>
+      <td><div class="tprog"><div class="tprog-track"><div class="tprog-fill" style="width:${p}%;background:${fc}"></div></div><span class="tprog-lbl">${p}%</span></div></td>`;
+    tb.appendChild(tr);
+  });
+  const rc=document.getElementById('rc1');if(rc)rc.textContent=`Showing ${data.length} of ${s1Rows.length} records`;
+}
+
+// ─── TABLE 2 ───────────────────────────────────────────────
+function sortT2(col){sa2=sc2===col?!sa2:true;sc2=col;renderT2();}
+function renderT2(){
+  const fP=(document.getElementById('s2-proj')||{}).value||'';
+  const fS=(document.getElementById('s2-subj')||{}).value||'';
+  const sq=((document.getElementById('s2-search')||{}).value||'').toLowerCase();
+  let data=facRows.filter(r=>{
+    if(fP&&r.project!==fP)return false;
+    if(fS&&r.subject!==fS)return false;
+    if(sq&&!(r.faculty+r.project+r.subject).toLowerCase().includes(sq))return false;
+    return true;
+  });
+  if(sc2>=0) data=[...data].sort((a,b)=>{
+    const av=[a.faculty,a.project,a.subject,a.req,a.done][sc2]??'';
+    const bv=[b.faculty,b.project,b.subject,b.req,b.done][sc2]??'';
+    const na=parseFloat(av),nb=parseFloat(bv);
+    const c=(!isNaN(na)&&!isNaN(nb))?na-nb:String(av).localeCompare(String(bv));
+    return sa2?c:-c;
+  });
+  const tb=document.getElementById('tb2');tb.innerHTML='';
+  data.forEach(r=>{
+    const p=r.req>0?Math.round(r.done/r.req*100):0;
+    const fc=pctClr(p);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-weight:600;color:var(--text)">${r.faculty||'–'}</td>
+      <td class="wc" style="color:var(--muted2)">${r.project||'–'}</td>
+      <td class="wc">${r.subject||'–'}</td>
+      <td style="color:var(--blue);font-weight:600">${r.req}</td>
+      <td style="color:var(--teal);font-weight:600">${r.done}</td>
+      <td><div class="tprog"><div class="tprog-track"><div class="tprog-fill" style="width:${p}%;background:${fc}"></div></div><span class="tprog-lbl">${p}%</span></div></td>`;
+    tb.appendChild(tr);
+  });
+  const rc=document.getElementById('rc2');if(rc)rc.textContent=`Showing ${data.length} of ${facRows.length} records`;
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+loadAll();
+setInterval(loadAll, 60000);
+</script>
+</body>
+</html>PE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
