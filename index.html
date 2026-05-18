@@ -289,15 +289,64 @@ td.w { white-space:normal; min-width:120px; color:var(--text); }
 .fac-nv   { font-family:var(--fd); font-size:1.2rem; font-weight:800; }
 .fac-nl   { font-size:.55rem; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-top:1px; font-family:var(--fm); }
 
-/* ── MONTH PILLS ── */
-.pill-row { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
-.pill {
-  font-family:var(--fm); font-size:.65rem; padding:5px 13px; border-radius:5px;
-  border:1px solid var(--line2); background:none; color:var(--muted); cursor:pointer;
-  transition:all .15s;
+/* ── MONTH SELECT BAR ── */
+.month-sel-bar {
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  margin-bottom:12px; padding:14px 20px;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
 }
-.pill:hover { border-color:var(--muted); color:var(--muted2); }
-.pill.active { border-color:var(--accent); color:var(--accent); background:rgba(34,214,114,.07); }
+.month-sel-label { flex:1; min-width:120px; }
+.month-sel-label .ct { margin-bottom:0; }
+.month-sel-label .cs { margin-bottom:0; }
+select.month-main-select {
+  background:var(--bg2); border:1px solid rgba(79,142,247,.3); color:var(--accent2);
+  font-family:var(--fm); font-size:.78rem; font-weight:500;
+  padding:8px 36px 8px 14px; border-radius:7px; outline:none;
+  cursor:pointer; min-width:180px; transition:border-color .2s;
+  -webkit-appearance:none; appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%234f8ef7' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 12px center;
+}
+select.month-main-select:focus { border-color:var(--accent2); color:var(--text); }
+.month-sel-badge {
+  font-family:var(--fm); font-size:.65rem; padding:4px 12px; border-radius:4px;
+  background:rgba(34,214,114,.08); border:1px solid rgba(34,214,114,.2);
+  color:var(--accent); white-space:nowrap;
+}
+
+/* ── MONTH DRILL SECTION ── */
+#month-drill-section { transition:opacity .25s; }
+#month-drill-section.hidden { display:none; }
+.month-no-sel {
+  padding:40px; text-align:center; background:var(--surface);
+  border:1px solid var(--line); border-radius:var(--r); margin-bottom:12px;
+  font-family:var(--fm); font-size:.72rem; color:var(--muted);
+}
+.month-no-sel span { display:block; font-size:1.5rem; margin-bottom:8px; opacity:.3; }
+
+/* ── TOP FACULTIES ── */
+.tfac-list { display:flex; flex-direction:column; gap:8px; margin-top:4px; }
+.tfac-row {
+  display:grid; align-items:center; gap:12px;
+  grid-template-columns:28px 1fr auto auto;
+  padding:10px 14px; border-radius:8px;
+  background:var(--bg2); border:1px solid var(--line);
+  transition:border-color .15s, background .15s;
+}
+.tfac-row:hover { border-color:var(--line2); background:var(--surface2); }
+.tfac-rank {
+  font-family:var(--fd); font-size:.9rem; font-weight:800;
+  text-align:center; line-height:1;
+}
+.tfac-rank.gold   { color:#f5c542; text-shadow:0 0 10px rgba(245,197,66,.3); }
+.tfac-rank.silver { color:#b0b8d4; }
+.tfac-rank.bronze { color:#c8834a; }
+.tfac-rank.rest   { color:var(--muted); font-size:.75rem; }
+.tfac-info { min-width:0; }
+.tfac-name { font-family:var(--fd); font-size:.82rem; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tfac-proj { font-family:var(--fm); font-size:.6rem; color:var(--muted2); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.tfac-bar-wrap { min-width:90px; }
+.tfac-pct-lbl { font-family:var(--fm); font-size:.72rem; font-weight:500; text-align:right; white-space:nowrap; }
 
 /* ── MONTH STAT CARDS ── */
 .month-stat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:10px; margin-bottom:12px; }
@@ -442,6 +491,18 @@ td.w { white-space:normal; min-width:120px; color:var(--text); }
           <div style="display:flex;gap:6px;flex-wrap:wrap" id="ov-month-legend"></div>
         </div>
         <div class="cw-m"><canvas id="c-monthly-bar"></canvas></div>
+      </div>
+
+      <!-- Top Faculties Leaderboard -->
+      <div class="card" style="margin-bottom:12px" id="ov-top-fac-card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+          <div>
+            <div class="ct">Top Faculties</div>
+            <div class="cs">ranked by videos completed</div>
+          </div>
+          <button class="toggle-btn" id="tfac-sort-btn" onclick="toggleFacSort()">By completed</button>
+        </div>
+        <div class="tfac-list" id="ov-top-fac-list"></div>
       </div>
 
       <div class="tbl-wrap" id="t1-wrap">
