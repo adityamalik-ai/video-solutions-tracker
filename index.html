@@ -9,392 +9,309 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
-:root {
-  --bg:       #07090f;
-  --bg2:      #0c0f1a;
-  --surface:  #101422;
-  --surface2: #151929;
-  --line:     #1c2135;
-  --line2:    #242a3d;
-  --text:     #e8ecf4;
-  --muted:    #4a5270;
-  --muted2:   #7a84a8;
-  --accent:   #22d672;
-  --accent2:  #4f8ef7;
-  --warn:     #f5a623;
-  --danger:   #ef4444;
-  --purple:   #9b6dff;
-  --fd: 'Syne', sans-serif;
-  --fm: 'DM Mono', monospace;
-  --fb: 'DM Sans', sans-serif;
-  --r: 10px;
+:root{
+  --bg:#07090f; --bg2:#0c0f1a; --surface:#101422; --surface2:#151929;
+  --line:#1c2135; --line2:#242a3d; --text:#e8ecf4;
+  --muted:#4a5270; --muted2:#7a84a8;
+  --accent:#22d672; --accent2:#4f8ef7; --warn:#f5a623;
+  --danger:#ef4444; --purple:#9b6dff;
+  --fd:'Syne',sans-serif; --fm:'DM Mono',monospace; --fb:'DM Sans',sans-serif;
+  --r:10px;
 }
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--fb);
-  font-size: 14px;
-  min-height: 100vh;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--text); font-family:var(--fb); font-size:14px; min-height:100vh;
   background-image:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(79,142,247,.08) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(34,214,114,.05) 0%, transparent 50%);
+    radial-gradient(ellipse 80% 50% at 50% -20%,rgba(79,142,247,.08) 0%,transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 100%,rgba(34,214,114,.05) 0%,transparent 50%);
 }
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:radial-gradient(circle,rgba(255,255,255,.028) 1px,transparent 1px);
+  background-size:28px 28px;
+}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--line2);border-radius:9px}
+::-webkit-scrollbar-thumb:hover{background:var(--muted)}
 
-/* Subtle dot grid */
-body::before {
-  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
-  background-image: radial-gradient(circle, rgba(255,255,255,.03) 1px, transparent 1px);
-  background-size: 28px 28px;
+/* HEADER */
+header{
+  position:sticky;top:0;z-index:100;padding:0 40px;height:64px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  background:rgba(7,9,15,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--line);
 }
+header::after{
+  content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(79,142,247,.3),rgba(34,214,114,.3),transparent);
+}
+.h-left{display:flex;align-items:center;gap:14px}
+.h-logo{
+  font-family:var(--fd);font-size:1.1rem;font-weight:800;letter-spacing:-.03em;
+  background:linear-gradient(135deg,var(--accent2),var(--accent));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.h-sep{width:1px;height:20px;background:var(--line2)}
+.h-meta{font-family:var(--fm);font-size:.62rem;color:var(--muted2);line-height:1.7}
+.h-meta b{color:var(--accent);font-weight:500}
+.live{display:inline-flex;align-items:center;gap:5px;font-size:.6rem;color:var(--muted);font-family:var(--fm);letter-spacing:.1em;text-transform:uppercase}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:pulse 2.4s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+.h-right{display:flex;align-items:center;gap:8px}
+.btn{
+  font-family:var(--fb);font-size:.72rem;font-weight:500;padding:7px 14px;border-radius:7px;
+  cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .18s;
+  border:1px solid var(--line2);background:var(--surface);color:var(--muted2);
+}
+.btn:hover{color:var(--text);border-color:var(--muted);background:var(--surface2)}
+.btn-export{border-color:rgba(79,142,247,.3);color:var(--accent2);background:rgba(79,142,247,.06)}
+.btn-export:hover{background:rgba(79,142,247,.12);border-color:var(--accent2)}
+.export-wrap{position:relative}
+.export-menu{
+  display:none;position:absolute;top:calc(100% + 6px);right:0;z-index:200;
+  background:var(--surface2);border:1px solid var(--line2);border-radius:9px;
+  padding:6px;min-width:170px;box-shadow:0 16px 48px rgba(0,0,0,.5);
+  animation:dropIn .15s ease;
+}
+@keyframes dropIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.export-wrap.open .export-menu{display:block}
+.exp-item{
+  display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:6px;
+  font-size:.75rem;cursor:pointer;color:var(--muted2);transition:all .12s;
+}
+.exp-item:hover{background:var(--surface);color:var(--text)}
+.exp-sep{height:1px;background:var(--line);margin:4px 0}
+.exp-section{font-family:var(--fm);font-size:.55rem;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;padding:5px 12px 3px}
 
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 5px; height: 5px; }
-::-webkit-scrollbar-track { background: var(--bg); }
-::-webkit-scrollbar-thumb { background: var(--line2); border-radius: 9px; }
-::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+/* TABS */
+.tabs-bar{
+  display:flex;padding:0 40px;border-bottom:1px solid var(--line);
+  background:rgba(7,9,15,.6);backdrop-filter:blur(8px);
+  position:sticky;top:64px;z-index:90;
+}
+.tab{
+  font-family:var(--fd);font-size:.78rem;font-weight:700;
+  padding:13px 22px;background:none;border:none;color:var(--muted);
+  cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;
+  letter-spacing:.04em;transition:all .15s;
+}
+.tab:hover{color:var(--muted2)}
+.tab.active{color:var(--text);border-bottom-color:var(--accent)}
+.panel{display:none} .panel.active{display:block}
 
-/* ── HEADER ── */
-header {
-  position: sticky; top: 0; z-index: 100;
-  padding: 0 40px;
-  height: 64px;
-  display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  background: rgba(7,9,15,.85);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--line);
-}
-header::after {
-  content:''; position:absolute; bottom:-1px; left:0; right:0; height:1px;
-  background: linear-gradient(90deg, transparent, rgba(79,142,247,.3), rgba(34,214,114,.3), transparent);
-}
-.h-left { display:flex; align-items:center; gap:16px; }
-.h-logo {
-  font-family: var(--fd); font-size: 1.1rem; font-weight: 800;
-  letter-spacing: -.03em;
-  background: linear-gradient(135deg, var(--accent2) 0%, var(--accent) 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-.h-sep { width:1px; height:20px; background:var(--line2); }
-.h-meta { font-family: var(--fm); font-size: .62rem; color: var(--muted2); line-height: 1.6; }
-.h-meta b { color: var(--accent); font-weight: 500; }
-.live {
-  display:inline-flex; align-items:center; gap:5px;
-  font-size:.6rem; color:var(--muted); font-family:var(--fm);
-  letter-spacing:.1em; text-transform:uppercase;
-}
-.live-dot { width:5px; height:5px; border-radius:50%; background:var(--accent); animation:pulse 2.4s ease infinite; }
-@keyframes pulse { 0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(34,214,114,.4);}50%{opacity:.3;box-shadow:0 0 6px 3px rgba(34,214,114,.1);} }
+/* LAYOUT */
+main{padding:28px 40px 80px;position:relative;z-index:1}
+.row{display:grid;gap:12px;margin-bottom:12px}
+.row-5{grid-template-columns:repeat(5,1fr)}
+.row-4{grid-template-columns:repeat(4,1fr)}
+.row-3{grid-template-columns:repeat(3,1fr)}
+.row-2{grid-template-columns:1fr 1fr}
+.row-21{grid-template-columns:2fr 1fr}
+.row-3c{grid-template-columns:1.4fr 1fr 1fr}
 
-.h-right { display:flex; align-items:center; gap:8px; }
-.btn {
-  font-family: var(--fb); font-size: .72rem; font-weight: 500;
-  padding: 7px 14px; border-radius: 7px; cursor: pointer;
-  display: inline-flex; align-items: center; gap: 6px;
-  transition: all .18s;
-  border: 1px solid var(--line2); background: var(--surface); color: var(--muted2);
+/* CARDS */
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r);
+  padding:20px;transition:border-color .2s,box-shadow .2s;position:relative;overflow:hidden;
 }
-.btn:hover { color: var(--text); border-color: var(--muted); background: var(--surface2); }
-.btn-icon { width: 14px; height: 14px; }
-.btn-export {
-  border-color: rgba(79,142,247,.35); color: var(--accent2);
-  background: rgba(79,142,247,.06);
-  position: relative;
+.card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.055),transparent);
 }
-.btn-export:hover { background: rgba(79,142,247,.12); border-color: var(--accent2); color: #7ab4ff; }
+.card:hover{border-color:var(--line2);box-shadow:0 4px 24px rgba(0,0,0,.25)}
+.card-sm{padding:18px 20px}
 
-/* Export dropdown */
-.export-wrap { position:relative; }
-.export-menu {
-  display:none; position:absolute; top:calc(100% + 6px); right:0; z-index:200;
-  background: var(--surface2); border: 1px solid var(--line2); border-radius: 9px;
-  padding: 6px; min-width: 170px;
-  box-shadow: 0 16px 48px rgba(0,0,0,.5);
-  animation: dropIn .15s ease;
-}
-@keyframes dropIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
-.export-wrap:focus-within .export-menu,
-.export-wrap.open .export-menu { display:block; }
-.exp-item {
-  display:flex; align-items:center; gap:10px; padding:9px 12px; border-radius:6px;
-  font-size:.75rem; cursor:pointer; color:var(--muted2); transition:all .12s;
-}
-.exp-item:hover { background:var(--surface); color:var(--text); }
-.exp-item svg { opacity:.7; flex-shrink:0; }
-.exp-sep { height:1px; background:var(--line); margin:4px 0; }
-.exp-section { font-family:var(--fm); font-size:.55rem; color:var(--muted); text-transform:uppercase; letter-spacing:.12em; padding:5px 12px 3px; }
+/* KPI */
+.kpi-label{font-size:.6rem;text-transform:uppercase;letter-spacing:.14em;color:var(--muted);margin-bottom:10px;font-family:var(--fm)}
+.kpi-val{font-family:var(--fd);font-size:2.2rem;font-weight:800;line-height:1;margin-bottom:4px}
+.kpi-sub{font-size:.68rem;color:var(--muted2)}
 
-/* ── TABS ── */
-.tabs-bar {
-  display:flex; gap:0; padding:0 40px;
-  border-bottom:1px solid var(--line);
-  background: rgba(7,9,15,.6); backdrop-filter:blur(8px);
-  position:sticky; top:64px; z-index:90;
+/* PROGRESS */
+.prog-hdr{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.prog-title{font-family:var(--fd);font-size:.85rem;font-weight:700}
+.prog-pct{font-family:var(--fm);font-size:.8rem;color:var(--accent);font-weight:500}
+.prog-track{height:4px;background:var(--line2);border-radius:99px;overflow:visible;position:relative}
+.prog-fill{
+  height:100%;border-radius:99px;
+  background:linear-gradient(90deg,var(--accent2),var(--accent));
+  transition:width 1.2s cubic-bezier(.4,0,.2,1);width:0%;position:relative;
 }
-.tab {
-  font-family:var(--fd); font-size:.78rem; font-weight:700;
-  padding:13px 22px; background:none; border:none; color:var(--muted);
-  cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px;
-  letter-spacing:.04em; transition:all .15s;
+.prog-fill::after{
+  content:'';position:absolute;right:-1px;top:50%;transform:translateY(-50%);
+  width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px rgba(34,214,114,.6);
 }
-.tab:hover { color:var(--muted2); }
-.tab.active { color:var(--text); border-bottom-color:var(--accent); }
-.panel { display:none; } .panel.active { display:block; }
+.prog-fill.blue{background:linear-gradient(90deg,var(--purple),var(--accent2))}
+.prog-fill.blue::after{background:var(--accent2);box-shadow:0 0 8px rgba(79,142,247,.6)}
+.prog-meta{display:flex;justify-content:space-between;margin-top:8px;font-size:.65rem;color:var(--muted);font-family:var(--fm)}
 
-/* ── LAYOUT ── */
-main { padding:28px 40px 80px; position:relative; z-index:1; }
-.row  { display:grid; gap:12px; margin-bottom:12px; }
-.row-5 { grid-template-columns:repeat(5,1fr); }
-.row-4 { grid-template-columns:repeat(4,1fr); }
-.row-3 { grid-template-columns:repeat(3,1fr); }
-.row-2 { grid-template-columns:1fr 1fr; }
-.row-21 { grid-template-columns:2fr 1fr; }
-.row-3c { grid-template-columns:1.4fr 1fr 1fr; }
+/* CHART */
+.ct{font-family:var(--fd);font-size:.85rem;font-weight:700;margin-bottom:2px;color:var(--text)}
+.cs{font-size:.67rem;color:var(--muted2);margin-bottom:16px}
+.cw{position:relative;height:200px}
+.cw-m{position:relative;height:250px}
+.cw-l{position:relative;height:300px}
 
-/* ── CARDS ── */
-.card {
-  background:var(--surface); border:1px solid var(--line);
-  border-radius:var(--r); padding:20px;
-  transition:border-color .2s, box-shadow .2s;
-  position:relative; overflow:hidden;
+/* TOGGLE COLLAPSIBLE */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.toggle-btn{
+  font-family:var(--fm);font-size:.62rem;padding:4px 12px;border-radius:5px;
+  background:none;border:1px solid var(--line2);color:var(--muted);cursor:pointer;
+  transition:all .15s;display:flex;align-items:center;gap:5px;
 }
-.card::before {
-  content:''; position:absolute; top:0; left:0; right:0; height:1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent);
-}
-.card:hover { border-color:var(--line2); box-shadow:0 4px 24px rgba(0,0,0,.25); }
-.card-sm { padding:18px 20px; }
+.toggle-btn:hover{color:var(--muted2);border-color:var(--muted)}
+.toggle-btn.open{color:var(--accent2);border-color:rgba(79,142,247,.4)}
+.collapsible{overflow:hidden;transition:max-height .4s ease,opacity .3s ease;max-height:0;opacity:0}
+.collapsible.open{max-height:400px;opacity:1}
 
-/* ── KPI ── */
-.kpi-label { font-size:.6rem; text-transform:uppercase; letter-spacing:.14em; color:var(--muted); margin-bottom:10px; font-family:var(--fm); }
-.kpi-val   { font-family:var(--fd); font-size:2.2rem; font-weight:800; line-height:1; margin-bottom:4px; }
-.kpi-sub   { font-size:.68rem; color:var(--muted2); }
-.kpi-strip {
-  position:absolute; left:0; top:0; bottom:0; width:2px; border-radius:1px;
-}
+/* DIVIDER */
+.divider{display:flex;align-items:center;gap:12px;margin:24px 0 16px}
+.divider-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--line2),transparent)}
+.divider-txt{font-family:var(--fm);font-size:.58rem;text-transform:uppercase;letter-spacing:.16em;color:var(--muted);white-space:nowrap}
 
-/* ── PROGRESS BAR ── */
-.prog-wrap { margin-bottom:12px; }
-.prog-hdr  { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px; }
-.prog-title { font-family:var(--fd); font-size:.85rem; font-weight:700; }
-.prog-pct  { font-family:var(--fm); font-size:.8rem; color:var(--accent); font-weight:500; }
-.prog-track { height:4px; background:var(--line2); border-radius:99px; overflow:visible; position:relative; }
-.prog-fill  {
-  height:100%; border-radius:99px;
-  background:linear-gradient(90deg, var(--accent2), var(--accent));
-  transition:width 1.2s cubic-bezier(.4,0,.2,1);
-  width:0%; position:relative;
+/* MONTH SELECTOR */
+.month-sel-bar{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding:14px 20px;background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--r);margin-bottom:12px;
 }
-.prog-fill::after {
-  content:''; position:absolute; right:-1px; top:50%; transform:translateY(-50%);
-  width:8px; height:8px; border-radius:50%;
-  background:var(--accent); box-shadow:0 0 8px rgba(34,214,114,.6);
+.month-sel-label .ct{margin-bottom:2px}
+.month-sel-label .cs{margin-bottom:0}
+select.month-ddl{
+  background:var(--bg2);border:1px solid rgba(79,142,247,.35);color:var(--accent2);
+  font-family:var(--fm);font-size:.78rem;font-weight:500;
+  padding:8px 36px 8px 14px;border-radius:7px;outline:none;cursor:pointer;
+  min-width:190px;transition:border-color .2s,color .2s;
+  -webkit-appearance:none;appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 11 11'%3E%3Cpath d='M1 3.5l4.5 4.5 4.5-4.5' stroke='%234f8ef7' stroke-width='1.4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;
 }
-.prog-fill.blue { background:linear-gradient(90deg, var(--purple), var(--accent2)); }
-.prog-fill.blue::after { background:var(--accent2); box-shadow:0 0 8px rgba(79,142,247,.6); }
-.prog-meta { display:flex; justify-content:space-between; margin-top:8px; font-size:.65rem; color:var(--muted); font-family:var(--fm); }
-
-/* ── CHART CONTAINER ── */
-.ct { font-family:var(--fd); font-size:.85rem; font-weight:700; margin-bottom:2px; color:var(--text); }
-.cs { font-size:.67rem; color:var(--muted2); margin-bottom:16px; }
-.cw  { position:relative; height:200px; }
-.cw-m { position:relative; height:250px; }
-.cw-l { position:relative; height:300px; }
-
-/* Toggle row for collapsible */
-.toggle-row {
-  display:flex; align-items:center; justify-content:space-between;
-  margin-bottom:4px;
+select.month-ddl:focus{border-color:var(--accent2);color:var(--text)}
+select.month-ddl option{color:var(--text);background:var(--bg2)}
+.month-badge{
+  font-family:var(--fm);font-size:.65rem;padding:4px 12px;border-radius:5px;
+  background:rgba(34,214,114,.08);border:1px solid rgba(34,214,114,.2);color:var(--accent);
 }
-.toggle-btn {
-  font-family:var(--fm); font-size:.62rem; padding:4px 12px; border-radius:5px;
-  background:none; border:1px solid var(--line2); color:var(--muted); cursor:pointer;
-  transition:all .15s; display:flex; align-items:center; gap:5px;
+#month-drill{animation:fd .3s ease}
+#month-drill.hidden{display:none}
+.no-month-hint{
+  text-align:center;padding:48px 20px;
+  background:var(--surface);border:1px dashed var(--line2);border-radius:var(--r);
+  margin-bottom:12px;font-family:var(--fm);font-size:.72rem;color:var(--muted);
 }
-.toggle-btn:hover { color:var(--muted2); border-color:var(--muted); }
-.toggle-btn.open { color:var(--accent2); border-color:rgba(79,142,247,.4); }
-.collapsible { overflow:hidden; transition:max-height .4s ease, opacity .3s ease; max-height:0; opacity:0; }
-.collapsible.open { max-height:400px; opacity:1; }
+.no-month-hint .icon{font-size:1.8rem;display:block;margin-bottom:8px;opacity:.25}
 
-/* ── DIVIDER ── */
-.divider { display:flex; align-items:center; gap:12px; margin:24px 0 16px; }
-.divider-line { flex:1; height:1px; background:linear-gradient(90deg, transparent, var(--line2), transparent); }
-.divider-txt  { font-family:var(--fm); font-size:.58rem; text-transform:uppercase; letter-spacing:.16em; color:var(--muted); white-space:nowrap; }
+/* MONTH STAT CARDS */
+.month-stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:12px}
+.msc{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px}
+.msc-lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin-bottom:6px;font-family:var(--fm)}
+.msc-val{font-family:var(--fd);font-size:1.6rem;font-weight:800;line-height:1;margin-bottom:3px}
+.msc-sub{font-size:.62rem;color:var(--muted2)}
 
-/* ── TABLE ── */
-.tbl-wrap { background:var(--surface); border:1px solid var(--line); border-radius:var(--r); overflow:hidden; margin-bottom:12px; }
-.tbl-top  { display:flex; align-items:center; justify-content:space-between; padding:14px 18px; border-bottom:1px solid var(--line); flex-wrap:wrap; gap:10px; background:var(--surface2); }
-.tbl-name { font-family:var(--fd); font-size:.85rem; font-weight:700; }
-.ctrl     { display:flex; gap:8px; flex-wrap:wrap; }
-select, .sinp {
-  background:var(--bg2); border:1px solid var(--line2); color:var(--muted2);
-  font-family:var(--fb); font-size:.72rem; padding:6px 10px; border-radius:6px;
-  outline:none; transition:border-color .2s;
+/* TABLE */
+.tbl-wrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;margin-bottom:12px}
+.tbl-top{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap;gap:10px;background:var(--surface2)}
+.tbl-name{font-family:var(--fd);font-size:.85rem;font-weight:700}
+.ctrl{display:flex;gap:8px;flex-wrap:wrap}
+select,.sinp{background:var(--bg2);border:1px solid var(--line2);color:var(--muted2);font-family:var(--fb);font-size:.72rem;padding:6px 10px;border-radius:6px;outline:none;transition:border-color .2s}
+select:focus,.sinp:focus{border-color:rgba(79,142,247,.5);color:var(--text)}
+.sinp{width:170px} .sinp::placeholder{color:var(--muted)}
+.twrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.76rem}
+thead th{padding:9px 14px;text-align:left;font-size:.58rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);border-bottom:1px solid var(--line);white-space:nowrap;cursor:pointer;font-family:var(--fm);user-select:none;background:var(--surface2)}
+thead th:hover{color:var(--muted2)}
+thead th.sorted{color:var(--accent2)}
+tbody tr{border-bottom:1px solid rgba(28,33,53,.7);transition:background .12s}
+tbody tr:hover{background:rgba(79,142,247,.04)}
+tbody tr:last-child{border-bottom:none}
+td{padding:10px 14px;vertical-align:middle;white-space:nowrap;color:var(--muted2)}
+td.w{white-space:normal;min-width:120px;color:var(--text)}
+.tbl-foot{padding:9px 18px;border-top:1px solid var(--line);font-size:.65rem;color:var(--muted);font-family:var(--fm);display:flex;justify-content:space-between;background:var(--surface2)}
+
+/* BADGE */
+.badge{display:inline-flex;padding:3px 9px;border-radius:5px;font-size:.58rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-family:var(--fm)}
+.b-done,.b-complete,.b-completed,.b-closed,.b-finished{background:rgba(34,214,114,.1);color:#22d672;border:1px solid rgba(34,214,114,.15)}
+.b-inprogress,.b-active,.b-ongoing,.b-started,.b-progress,.b-wip{background:rgba(79,142,247,.1);color:#7ab4ff;border:1px solid rgba(79,142,247,.2)}
+.b-pending,.b-todo,.b-open,.b-notstarted,.b-new{background:rgba(245,166,35,.08);color:#f5c96b;border:1px solid rgba(245,166,35,.15)}
+.b-blocked,.b-hold,.b-onhold{background:rgba(239,68,68,.08);color:#f87171;border:1px solid rgba(239,68,68,.15)}
+.b-default{background:var(--line);color:var(--muted2);border:1px solid var(--line2)}
+
+/* MINI PROGRESS */
+.mp{display:flex;align-items:center;gap:8px}
+.mp-track{flex:1;height:3px;background:var(--line2);border-radius:99px;overflow:hidden;min-width:50px}
+.mp-fill{height:100%;border-radius:99px}
+.mp-lbl{font-family:var(--fm);font-size:.65rem;color:var(--muted);min-width:32px;text-align:right}
+
+/* TOP FACULTY */
+.tfac-list{display:flex;flex-direction:column;gap:7px}
+.tfac-row{
+  display:grid;align-items:center;gap:12px;
+  grid-template-columns:30px 1fr 100px 54px;
+  padding:10px 14px;border-radius:8px;
+  background:var(--bg2);border:1px solid var(--line);
+  transition:border-color .15s,background .15s;
 }
-select:focus, .sinp:focus { border-color:rgba(79,142,247,.5); color:var(--text); }
-.sinp { width:170px; } .sinp::placeholder { color:var(--muted); }
-.twrap { overflow-x:auto; }
-table  { width:100%; border-collapse:collapse; font-size:.76rem; }
-thead th {
-  padding:9px 14px; text-align:left; font-size:.58rem; text-transform:uppercase;
-  letter-spacing:.12em; color:var(--muted); border-bottom:1px solid var(--line);
-  white-space:nowrap; cursor:pointer; font-family:var(--fm); user-select:none;
-  background:var(--surface2);
+.tfac-row:hover{border-color:var(--line2);background:var(--surface2)}
+.tfac-rank{font-family:var(--fd);font-size:.95rem;font-weight:800;text-align:center}
+.tfac-rank.r1{color:#f5c542;text-shadow:0 0 12px rgba(245,197,66,.35)}
+.tfac-rank.r2{color:#b0b8d4}
+.tfac-rank.r3{color:#c4784a}
+.tfac-rank.rn{color:var(--muted);font-size:.72rem}
+.tfac-info{min-width:0}
+.tfac-name{font-family:var(--fd);font-size:.82rem;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tfac-meta{font-family:var(--fm);font-size:.6rem;color:var(--muted2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tfac-bar-wrap{display:flex;flex-direction:column;gap:3px}
+.tfac-bar-track{height:3px;background:var(--line2);border-radius:99px;overflow:hidden}
+.tfac-bar-fill{height:100%;border-radius:99px}
+.tfac-bar-sub{font-family:var(--fm);font-size:.55rem;color:var(--muted)}
+.tfac-val{font-family:var(--fd);font-size:1.1rem;font-weight:800;text-align:right}
+
+/* FACULTY CARDS */
+.fac-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:12px}
+.fac-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px 18px;transition:border-color .2s,transform .15s,box-shadow .2s;cursor:default}
+.fac-card:hover{border-color:var(--line2);transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.3)}
+.fac-name{font-family:var(--fd);font-size:.9rem;font-weight:700;margin-bottom:2px}
+.fac-proj{font-size:.62rem;color:var(--muted2);margin-bottom:12px;line-height:1.5}
+.fac-nums{display:flex;gap:8px;margin-bottom:10px}
+.fac-num{flex:1;text-align:center;background:var(--bg2);border-radius:6px;padding:6px 4px}
+.fac-nv{font-family:var(--fd);font-size:1.2rem;font-weight:800}
+.fac-nl{font-size:.55rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-top:1px;font-family:var(--fm)}
+
+/* HEATMAP */
+.hm-cell{height:28px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-family:var(--fm);font-size:.58rem;color:rgba(255,255,255,.85);transition:transform .12s;cursor:default}
+.hm-cell:hover{transform:scale(1.08);z-index:2;position:relative}
+.hm-lbl{font-size:.62rem;color:var(--muted2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;font-family:var(--fm)}
+.hm-hdr{font-size:.58rem;color:var(--muted);text-align:center;font-family:var(--fm);padding-bottom:4px}
+
+/* LOADER */
+#loader{display:flex;flex-direction:column;align-items:center;justify-content:center;height:70vh;gap:12px;position:relative;z-index:2}
+.spin{width:28px;height:28px;border:1.5px solid var(--line2);border-top-color:var(--accent);border-radius:50%;animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.ltxt{font-family:var(--fm);font-size:.65rem;color:var(--muted2);letter-spacing:.1em}
+#err{display:none;border:1px solid rgba(239,68,68,.3);border-radius:var(--r);padding:20px 24px;color:#f87171;font-size:.8rem;line-height:1.9;margin:24px 40px;background:rgba(239,68,68,.04)}
+#app{display:none}
+.fade{animation:fd .35s ease both}
+@keyframes fd{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* TOAST */
+#export-toast{
+  position:fixed;bottom:28px;right:28px;z-index:999;
+  background:var(--surface2);border:1px solid var(--line2);border-radius:9px;
+  padding:11px 18px;font-family:var(--fm);font-size:.72rem;color:var(--text);
+  box-shadow:0 12px 40px rgba(0,0,0,.5);display:flex;align-items:center;gap:10px;
+  opacity:0;transform:translateY(12px);transition:all .25s;
 }
-thead th:hover { color:var(--muted2); }
-thead th.sorted { color:var(--accent2); }
-tbody tr { border-bottom:1px solid rgba(28,33,53,.7); transition:background .12s; }
-tbody tr:hover { background:rgba(79,142,247,.04); }
-tbody tr:last-child { border-bottom:none; }
-td { padding:10px 14px; vertical-align:middle; white-space:nowrap; color:var(--muted2); }
-td.w { white-space:normal; min-width:120px; color:var(--text); }
-.tbl-foot { padding:9px 18px; border-top:1px solid var(--line); font-size:.65rem; color:var(--muted); font-family:var(--fm); display:flex; justify-content:space-between; background:var(--surface2); }
+#export-toast.show{opacity:1;transform:translateY(0)}
+.t-icon{color:var(--accent)}
 
-/* ── BADGE ── */
-.badge {
-  display:inline-flex; padding:3px 9px; border-radius:5px;
-  font-size:.58rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
-  font-family:var(--fm);
-}
-.b-done,.b-complete,.b-completed,.b-closed,.b-finished { background:rgba(34,214,114,.1); color:#22d672; border:1px solid rgba(34,214,114,.15); }
-.b-inprogress,.b-active,.b-ongoing,.b-started,.b-progress,.b-wip { background:rgba(79,142,247,.1); color:#7ab4ff; border:1px solid rgba(79,142,247,.2); }
-.b-pending,.b-todo,.b-open,.b-notstarted,.b-new { background:rgba(245,166,35,.08); color:#f5c96b; border:1px solid rgba(245,166,35,.15); }
-.b-blocked,.b-hold,.b-onhold { background:rgba(239,68,68,.08); color:#f87171; border:1px solid rgba(239,68,68,.15); }
-.b-default { background:var(--line); color:var(--muted2); border:1px solid var(--line2); }
-
-/* ── MINI PROGRESS ── */
-.mp { display:flex; align-items:center; gap:8px; }
-.mp-track { flex:1; height:3px; background:var(--line2); border-radius:99px; overflow:hidden; min-width:50px; }
-.mp-fill  { height:100%; border-radius:99px; transition:width .8s ease; }
-.mp-lbl   { font-family:var(--fm); font-size:.65rem; color:var(--muted); min-width:32px; text-align:right; }
-
-/* ── STAT ROW ── */
-.stat-row { display:flex; gap:24px; margin-top:16px; padding-top:16px; border-top:1px solid var(--line); }
-.stat-item .val { font-family:var(--fd); font-size:1.2rem; font-weight:800; }
-.stat-item .lbl { font-size:.6rem; color:var(--muted); text-transform:uppercase; letter-spacing:.1em; font-family:var(--fm); margin-top:2px; }
-
-/* ── FACULTY CARDS ── */
-.fac-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px; margin-bottom:12px; }
-.fac-card {
-  background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
-  padding:16px 18px; transition:border-color .2s, transform .15s, box-shadow .2s; cursor:default;
-}
-.fac-card:hover { border-color:var(--line2); transform:translateY(-2px); box-shadow:0 8px 32px rgba(0,0,0,.3); }
-.fac-name { font-family:var(--fd); font-size:.9rem; font-weight:700; margin-bottom:2px; }
-.fac-proj { font-size:.62rem; color:var(--muted2); margin-bottom:12px; line-height:1.5; }
-.fac-nums { display:flex; gap:8px; margin-bottom:10px; }
-.fac-num  { flex:1; text-align:center; background:var(--bg2); border-radius:6px; padding:6px 4px; }
-.fac-nv   { font-family:var(--fd); font-size:1.2rem; font-weight:800; }
-.fac-nl   { font-size:.55rem; color:var(--muted); text-transform:uppercase; letter-spacing:.08em; margin-top:1px; font-family:var(--fm); }
-
-/* ── MONTH SELECT BAR ── */
-.month-sel-bar {
-  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
-  margin-bottom:12px; padding:14px 20px;
-  background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
-}
-.month-sel-label { flex:1; min-width:120px; }
-.month-sel-label .ct { margin-bottom:0; }
-.month-sel-label .cs { margin-bottom:0; }
-select.month-main-select {
-  background:var(--bg2); border:1px solid rgba(79,142,247,.3); color:var(--accent2);
-  font-family:var(--fm); font-size:.78rem; font-weight:500;
-  padding:8px 36px 8px 14px; border-radius:7px; outline:none;
-  cursor:pointer; min-width:180px; transition:border-color .2s;
-  -webkit-appearance:none; appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%234f8ef7' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat; background-position:right 12px center;
-}
-select.month-main-select:focus { border-color:var(--accent2); color:var(--text); }
-.month-sel-badge {
-  font-family:var(--fm); font-size:.65rem; padding:4px 12px; border-radius:4px;
-  background:rgba(34,214,114,.08); border:1px solid rgba(34,214,114,.2);
-  color:var(--accent); white-space:nowrap;
-}
-
-/* ── MONTH DRILL SECTION ── */
-#month-drill-section { transition:opacity .25s; }
-#month-drill-section.hidden { display:none; }
-.month-no-sel {
-  padding:40px; text-align:center; background:var(--surface);
-  border:1px solid var(--line); border-radius:var(--r); margin-bottom:12px;
-  font-family:var(--fm); font-size:.72rem; color:var(--muted);
-}
-.month-no-sel span { display:block; font-size:1.5rem; margin-bottom:8px; opacity:.3; }
-
-/* ── TOP FACULTIES ── */
-.tfac-list { display:flex; flex-direction:column; gap:8px; margin-top:4px; }
-.tfac-row {
-  display:grid; align-items:center; gap:12px;
-  grid-template-columns:28px 1fr auto auto;
-  padding:10px 14px; border-radius:8px;
-  background:var(--bg2); border:1px solid var(--line);
-  transition:border-color .15s, background .15s;
-}
-.tfac-row:hover { border-color:var(--line2); background:var(--surface2); }
-.tfac-rank {
-  font-family:var(--fd); font-size:.9rem; font-weight:800;
-  text-align:center; line-height:1;
-}
-.tfac-rank.gold   { color:#f5c542; text-shadow:0 0 10px rgba(245,197,66,.3); }
-.tfac-rank.silver { color:#b0b8d4; }
-.tfac-rank.bronze { color:#c8834a; }
-.tfac-rank.rest   { color:var(--muted); font-size:.75rem; }
-.tfac-info { min-width:0; }
-.tfac-name { font-family:var(--fd); font-size:.82rem; font-weight:700; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.tfac-proj { font-family:var(--fm); font-size:.6rem; color:var(--muted2); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.tfac-bar-wrap { min-width:90px; }
-.tfac-pct-lbl { font-family:var(--fm); font-size:.72rem; font-weight:500; text-align:right; white-space:nowrap; }
-
-/* ── MONTH STAT CARDS ── */
-.month-stat-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:10px; margin-bottom:12px; }
-.msc { background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:14px 16px; }
-.msc-lbl { font-size:.58rem; text-transform:uppercase; letter-spacing:.12em; color:var(--muted); margin-bottom:6px; font-family:var(--fm); }
-.msc-val { font-family:var(--fd); font-size:1.6rem; font-weight:800; line-height:1; margin-bottom:3px; }
-.msc-sub { font-size:.62rem; color:var(--muted2); }
-
-/* ── HEATMAP ── */
-.hm-cell {
-  height:28px; border-radius:5px; display:flex; align-items:center; justify-content:center;
-  font-family:var(--fm); font-size:.58rem; color:rgba(255,255,255,.85);
-  transition:transform .12s; cursor:default;
-}
-.hm-cell:hover { transform:scale(1.08); z-index:2; position:relative; }
-.hm-lbl { font-size:.62rem; color:var(--muted2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; font-family:var(--fm); }
-.hm-hdr { font-size:.58rem; color:var(--muted); text-align:center; font-family:var(--fm); padding-bottom:4px; }
-
-/* ── LOADER / ERROR ── */
-#loader { display:flex; flex-direction:column; align-items:center; justify-content:center; height:70vh; gap:12px; position:relative; z-index:2; }
-.spin { width:28px; height:28px; border:1.5px solid var(--line2); border-top-color:var(--accent); border-radius:50%; animation:sp .7s linear infinite; }
-@keyframes sp { to { transform:rotate(360deg); } }
-.ltxt { font-family:var(--fm); font-size:.65rem; color:var(--muted2); letter-spacing:.1em; }
-#err { display:none; border:1px solid rgba(239,68,68,.3); border-radius:var(--r); padding:20px 24px; color:#f87171; font-size:.8rem; line-height:1.9; margin:24px 40px; background:rgba(239,68,68,.04); }
-#app { display:none; }
-.fade { animation:fd .35s ease both; }
-@keyframes fd { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-
-/* ── EXPORT TOAST ── */
-#export-toast {
-  position:fixed; bottom:28px; right:28px; z-index:999;
-  background:var(--surface2); border:1px solid var(--line2); border-radius:9px;
-  padding:11px 18px; font-family:var(--fm); font-size:.72rem; color:var(--text);
-  box-shadow:0 12px 40px rgba(0,0,0,.5); display:flex; align-items:center; gap:10px;
-  opacity:0; transform:translateY(12px); transition:all .25s;
-}
-#export-toast.show { opacity:1; transform:translateY(0); }
-#export-toast .t-icon { color:var(--accent); font-size:.9rem; }
-
-/* ── RESPONSIVE ── */
-@media (max-width:1100px) { .row-5 { grid-template-columns:repeat(3,1fr); } .row-3c { grid-template-columns:1fr 1fr; } }
-@media (max-width:760px)  { .row-5,.row-4,.row-3,.row-3c { grid-template-columns:repeat(2,1fr); } .row-2,.row-21 { grid-template-columns:1fr; } header { padding:0 16px; } }
-@media (max-width:540px)  { main, .tabs-bar { padding-left:16px; padding-right:16px; } .row-5,.row-4,.row-3,.row-3c,.row-2 { grid-template-columns:1fr; } }
+/* RESPONSIVE */
+@media(max-width:1100px){.row-5{grid-template-columns:repeat(3,1fr)}.row-3c{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.row-5,.row-4,.row-3,.row-3c{grid-template-columns:repeat(2,1fr)}.row-2,.row-21{grid-template-columns:1fr}header{padding:0 16px}.tabs-bar{padding:0 16px}}
+@media(max-width:540px){main{padding-left:16px;padding-right:16px}.row-5,.row-4,.row-3,.row-3c,.row-2{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 
-<!-- TOAST -->
 <div id="export-toast"><span class="t-icon">✓</span><span id="toast-msg">Export ready</span></div>
 
 <header>
@@ -424,7 +341,7 @@ select.month-main-select:focus { border-color:var(--accent2); color:var(--text);
           Export as CSV
         </div>
         <div class="exp-item" onclick="exportPDF()">
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M9 2H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6L9 2z" stroke="currentColor" stroke-width="1.3"/><path d="M9 2v4h4" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M5.5 9.5h5M5.5 11.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M9 2H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V6L9 2z" stroke="currentColor" stroke-width="1.3"/><path d="M9 2v4h4" stroke="currentColor" stroke-width="1.3"/><path d="M5.5 9.5h5M5.5 11.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
           Export as PDF
         </div>
         <div class="exp-sep"></div>
@@ -449,10 +366,10 @@ select.month-main-select:focus { border-color:var(--accent2); color:var(--text);
   </div>
   <main>
 
-    <!-- ════════════ OVERVIEW ════════════ -->
+    <!-- ══════════════════ OVERVIEW ══════════════════ -->
     <div class="panel active fade" id="tab-overview">
 
-      <div class="row row-2" style="margin-bottom:12px">
+      <div class="row row-2">
         <div class="card card-sm" style="border-left:2px solid var(--accent)">
           <div class="kpi-label">Completed</div>
           <div class="kpi-val" id="k-done" style="color:var(--accent)">–</div>
@@ -465,27 +382,24 @@ select.month-main-select:focus { border-color:var(--accent2); color:var(--text);
         </div>
       </div>
 
-      <div class="card" style="margin-bottom:12px">
-        <div class="prog-hdr">
-          <span class="prog-title">Overall Completion</span>
-          <span class="prog-pct" id="ov-pct">0%</span>
-        </div>
+      <div class="card">
+        <div class="prog-hdr"><span class="prog-title">Overall Completion</span><span class="prog-pct" id="ov-pct">0%</span></div>
         <div class="prog-track"><div class="prog-fill" id="pf-main"></div></div>
         <div class="prog-meta"><span><span id="pn-done">0</span> completed</span><span><span id="pn-req">0</span> required</span></div>
       </div>
 
-      <div class="row row-3c" style="margin-bottom:12px">
+      <div class="row row-3c">
         <div class="card"><div class="ct">Required vs Completed</div><div class="cs">by project</div><div class="cw-m"><canvas id="c-proj-bar"></canvas></div></div>
         <div class="card"><div class="ct">Status Distribution</div><div class="cs">task breakdown</div><div class="cw"><canvas id="c-status"></canvas></div></div>
         <div class="card"><div class="ct">By Subject</div><div class="cs">task count</div><div class="cw"><canvas id="c-subject"></canvas></div></div>
       </div>
 
-      <div class="row row-2" style="margin-bottom:12px">
+      <div class="row row-2">
         <div class="card"><div class="ct">Completion % by Project</div><div class="cs">progress per project</div><div class="cw"><canvas id="c-proj-pct"></canvas></div></div>
         <div class="card"><div class="ct">Videos Completed by Subject</div><div class="cs">output ranking</div><div class="cw"><canvas id="c-subj-done"></canvas></div></div>
       </div>
 
-      <div class="card" style="margin-bottom:12px" id="ov-monthly-card">
+      <div class="card" id="ov-monthly-card">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:4px">
           <div><div class="ct">Monthly Output</div><div class="cs">videos completed per month, by project</div></div>
           <div style="display:flex;gap:6px;flex-wrap:wrap" id="ov-month-legend"></div>
@@ -493,19 +407,19 @@ select.month-main-select:focus { border-color:var(--accent2); color:var(--text);
         <div class="cw-m"><canvas id="c-monthly-bar"></canvas></div>
       </div>
 
-      <!-- Top Faculties Leaderboard -->
-      <div class="card" style="margin-bottom:12px" id="ov-top-fac-card">
+      <!-- Top Faculties in Overview -->
+      <div class="card" id="ov-top-fac-card">
         <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px">
-          <div>
-            <div class="ct">Top Faculties</div>
-            <div class="cs">ranked by videos completed</div>
+          <div><div class="ct">Top Faculties</div><div class="cs">ranked by total videos completed</div></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <span style="font-family:var(--fm);font-size:.6rem;color:var(--muted)">sort by</span>
+            <button class="toggle-btn" id="tfac-sort-btn" onclick="toggleFacSort()">Completed ↓</button>
           </div>
-          <button class="toggle-btn" id="tfac-sort-btn" onclick="toggleFacSort()">By completed</button>
         </div>
         <div class="tfac-list" id="ov-top-fac-list"></div>
       </div>
 
-      <div class="tbl-wrap" id="t1-wrap">
+      <div class="tbl-wrap">
         <div class="tbl-top">
           <span class="tbl-name">All Records</span>
           <div class="ctrl">
@@ -523,13 +437,27 @@ select.month-main-select:focus { border-color:var(--accent2); color:var(--text);
           <th onclick="sortT1(4)">Completed <span>↕</span></th>
           <th>Progress</th>
         </tr></thead><tbody id="tb1"></tbody></table></div>
-        <div class="tbl-foot"><span id="rc1">–</span><span>auto-refresh every 60s</span></div>
+        <div class="tbl-foot"><span id="rc1">–</span><span>auto-refresh 60s</span></div>
       </div>
     </div>
 
-    <!-- ════════════ MONTHLY ════════════ -->
+    <!-- ══════════════════ MONTHLY ══════════════════ -->
     <div class="panel fade" id="tab-monthly">
-      <div class="row row-2" style="margin-bottom:12px">
+
+      <!-- Month dropdown at the very top -->
+      <div class="month-sel-bar">
+        <div class="month-sel-label" style="flex:1">
+          <div class="ct">Monthly Overview</div>
+          <div class="cs" style="margin-top:1px;margin-bottom:0">Select a month to drill into its breakdown and trends</div>
+        </div>
+        <select class="month-ddl" id="month-main-ddl" onchange="onMonthDDL()">
+          <option value="">All Months</option>
+        </select>
+        <span class="month-badge" id="month-active-badge" style="display:none">viewing month</span>
+      </div>
+
+      <!-- Always-visible KPIs -->
+      <div class="row row-2">
         <div class="card card-sm" style="border-left:2px solid var(--accent)">
           <div class="kpi-label">Best Month</div>
           <div class="kpi-val" id="mk-best" style="color:var(--accent)">–</div>
@@ -542,65 +470,70 @@ select.month-main-select:focus { border-color:var(--accent2); color:var(--text);
         </div>
       </div>
 
-      <div class="card card-sm" style="margin-bottom:12px">
-        <div class="ct" style="margin-bottom:8px">Select Month</div>
-        <div class="pill-row" id="month-pills"></div>
+      <!-- Always-visible charts -->
+      <div class="row row-2">
+        <div class="card"><div class="ct">Monthly Output Trend</div><div class="cs">total videos completed each month</div><div class="cw-m"><canvas id="mc-trend"></canvas></div></div>
+        <div class="card"><div class="ct">Monthly Share by Subject</div><div class="cs">stacked contribution per month</div><div class="cw-m"><canvas id="mc-subj-stack"></canvas></div></div>
       </div>
 
-      <div class="row row-2" style="margin-bottom:12px">
-        <div class="card"><div class="ct">Monthly Output Trend</div><div class="cs">total videos completed</div><div class="cw-m"><canvas id="mc-trend"></canvas></div></div>
-        <div class="card"><div class="ct">Monthly Share by Subject</div><div class="cs">stacked contribution</div><div class="cw-m"><canvas id="mc-subj-stack"></canvas></div></div>
-      </div>
-
-      <!-- Collapsible line chart -->
-      <div class="card" style="margin-bottom:12px" id="proj-trend-card">
-        <div class="toggle-row">
-          <div>
-            <div class="ct">Monthly Output by Project</div>
-            <div class="cs">project trends across months</div>
-          </div>
-          <button class="toggle-btn" id="proj-trend-toggle" onclick="toggleProjTrend()">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Show trends
-          </button>
-        </div>
-        <div class="collapsible" id="proj-trend-collapsible">
-          <div class="cw-l" style="margin-top:16px"><canvas id="mc-proj-trend"></canvas></div>
-        </div>
-      </div>
-
-      <div class="card" style="margin-bottom:12px">
+      <div class="card">
         <div class="ct">Project × Month Heatmap</div>
         <div class="cs">videos completed — darker = higher output</div>
         <div id="heatmap-container" style="overflow-x:auto;margin-top:8px"></div>
       </div>
 
-      <div class="divider"><div class="divider-line"></div><div class="divider-txt" id="drill-title">month breakdown</div><div class="divider-line"></div></div>
-      <div class="month-stat-grid" id="month-stat-cards"></div>
-
-      <div class="row row-2" style="margin-bottom:12px">
-        <div class="card"><div class="ct" id="mc-drill-title">Month by Project</div><div class="cs">completed in selected month</div><div class="cw-m"><canvas id="mc-drill-proj"></canvas></div></div>
-        <div class="card"><div class="ct">Month by Subject</div><div class="cs">completed by subject</div><div class="cw-m"><canvas id="mc-drill-subj"></canvas></div></div>
+      <!-- No-month hint -->
+      <div id="month-no-sel-hint" class="no-month-hint">
+        <span class="icon">📅</span>
+        Select a month from the dropdown above to view detailed breakdown, charts, and records for that month
       </div>
 
-      <div class="tbl-wrap" id="tm-wrap">
-        <div class="tbl-top">
-          <span class="tbl-name" id="mtbl-title">Monthly Records</span>
-          <div class="ctrl">
-            <input class="sinp" id="sm-search" type="text" placeholder="Search…" oninput="renderTM()"/>
-            <select id="sm-proj" onchange="renderTM()"><option value="">All Projects</option></select>
-            <select id="sm-subj" onchange="renderTM()"><option value="">All Subjects</option></select>
-            <select id="sm-month" onchange="onMonthSelectChange()"><option value="">All Months</option></select>
+      <!-- Drill-down section – shown only when a month is selected -->
+      <div id="month-drill" class="hidden">
+
+        <div class="divider"><div class="divider-line"></div><div class="divider-txt" id="drill-title">month breakdown</div><div class="divider-line"></div></div>
+        <div class="month-stat-grid" id="month-stat-cards"></div>
+
+        <!-- Collapsible project-trend line chart -->
+        <div class="card">
+          <div class="toggle-row">
+            <div><div class="ct">Monthly Output by Project</div><div class="cs">project-level trends across all months</div></div>
+            <button class="toggle-btn" id="proj-trend-toggle" onclick="toggleProjTrend()">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Show trends
+            </button>
+          </div>
+          <div class="collapsible" id="proj-trend-collapsible">
+            <div class="cw-l" style="margin-top:16px"><canvas id="mc-proj-trend"></canvas></div>
           </div>
         </div>
-        <div class="twrap"><table id="mtbl-table"><thead id="mtbl-head"></thead><tbody id="tbm"></tbody></table></div>
-        <div class="tbl-foot"><span id="rcm">–</span></div>
-      </div>
+
+        <div class="row row-2">
+          <div class="card"><div class="ct" id="mc-drill-title">Month by Project</div><div class="cs">completed in selected month</div><div class="cw-m"><canvas id="mc-drill-proj"></canvas></div></div>
+          <div class="card"><div class="ct">Month by Subject</div><div class="cs">completed by subject</div><div class="cw-m"><canvas id="mc-drill-subj"></canvas></div></div>
+        </div>
+
+        <div class="tbl-wrap">
+          <div class="tbl-top">
+            <span class="tbl-name" id="mtbl-title">Monthly Records</span>
+            <div class="ctrl">
+              <input class="sinp" id="sm-search" type="text" placeholder="Search…" oninput="renderTM()"/>
+              <select id="sm-proj" onchange="renderTM()"><option value="">All Projects</option></select>
+              <select id="sm-subj" onchange="renderTM()"><option value="">All Subjects</option></select>
+            </div>
+          </div>
+          <div class="twrap"><table><thead id="mtbl-head"></thead><tbody id="tbm"></tbody></table></div>
+          <div class="tbl-foot"><span id="rcm">–</span></div>
+        </div>
+
+      </div><!-- /month-drill -->
+
     </div>
 
-    <!-- ════════════ FACULTY ════════════ -->
+    <!-- ══════════════════ FACULTY ══════════════════ -->
     <div class="panel fade" id="tab-faculty">
-      <div class="row row-3" style="margin-bottom:12px">
+
+      <div class="row row-3">
         <div class="card card-sm" style="border-left:2px solid var(--muted)">
           <div class="kpi-label">Total Faculties</div>
           <div class="kpi-val" id="fk-total">–</div>
@@ -618,26 +551,42 @@ select.month-main-select:focus { border-color:var(--accent2); color:var(--text);
         </div>
       </div>
 
-      <div class="card" style="margin-bottom:12px">
+      <div class="card">
         <div class="prog-hdr"><span class="prog-title">Overall Progress</span><span class="prog-pct" id="fov-pct">0%</span></div>
         <div class="prog-track"><div class="prog-fill blue" id="fpf-main"></div></div>
         <div class="prog-meta"><span><span id="fpn-done">0</span> completed</span><span><span id="fpn-req">0</span> assigned</span></div>
       </div>
 
-      <div class="row row-21" style="margin-bottom:12px">
+      <!-- Monthly performance leaderboard for faculty -->
+      <div class="card" id="fac-monthly-board">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+          <div>
+            <div class="ct">Faculty Monthly Performance</div>
+            <div class="cs" id="fac-monthly-board-sub">top faculties by output — select month to filter</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <select class="month-ddl" id="fac-month-ddl" onchange="onFacMonthChange()" style="min-width:150px">
+              <option value="">All Months</option>
+            </select>
+          </div>
+        </div>
+        <div class="tfac-list" id="fac-monthly-list"></div>
+      </div>
+
+      <div class="row row-21">
         <div class="card"><div class="ct">Assigned vs Completed</div><div class="cs">by faculty</div><div class="cw-l"><canvas id="fc-bar"></canvas></div></div>
         <div class="card"><div class="ct">Completion %</div><div class="cs">colour-coded</div><div class="cw-l"><canvas id="fc-pct"></canvas></div></div>
       </div>
 
-      <div class="row row-2" style="margin-bottom:12px">
-        <div class="card"><div class="ct">Load by Project</div><div class="cs">faculty videos per project</div><div class="cw"><canvas id="fc-proj"></canvas></div></div>
+      <div class="row row-2">
+        <div class="card"><div class="ct">Load by Project</div><div class="cs">videos per project</div><div class="cw"><canvas id="fc-proj"></canvas></div></div>
         <div class="card"><div class="ct">Work Share</div><div class="cs">distribution of assigned VS</div><div class="cw"><canvas id="fc-donut"></canvas></div></div>
       </div>
 
       <div class="divider"><div class="divider-line"></div><div class="divider-txt">faculty cards</div><div class="divider-line"></div></div>
       <div class="fac-grid" id="fac-cards"></div>
 
-      <div class="tbl-wrap" id="t2-wrap">
+      <div class="tbl-wrap">
         <div class="tbl-top">
           <span class="tbl-name">Faculty Detail Records</span>
           <div class="ctrl">
@@ -662,72 +611,47 @@ select.month-main-select:focus { border-color:var(--accent2); color:var(--text);
 </div>
 
 <script>
-// ── CONFIG ────────────────────────────────────────────────
+// ── CONFIG ─────────────────────────────────────────────
 const SHEET_ID = '1D80kh-8ypS0adpH1RRSl4Nb2IbBB93_DdHeslbgzm9Y';
 const GID_S1   = '0';
 const GID_S2   = '679296378';
 
-// ── PALETTE ───────────────────────────────────────────────
+// ── PALETTE ────────────────────────────────────────────
 const C = ['#22d672','#4f8ef7','#f5a623','#ef4444','#9b6dff','#06d6d0','#f97316','#ec4899','#a3e635','#38bdf8'];
 const slug = s => (s||'').toLowerCase().replace(/[\s_\-\/\(\)\.]/g,'');
 const SKIP = new Set(['classxi','classxii','classx','classix','classviii','class']);
 
-// ── STATE ─────────────────────────────────────────────────
+// ── STATE ──────────────────────────────────────────────
 let s1Rows=[], facRows=[], charts={}, monthCols=[], activeMonth='';
 let sc1=-1, sa1=true, sc2=-1, sa2=true;
-let projTrendOpen=false;
+let projTrendOpen=false, facSortByRate=false, facMonthActive='';
 
-// ── CHART BASE CONFIG ─────────────────────────────────────
-Chart.defaults.color = '#7a84a8';
-Chart.defaults.font.family = 'DM Mono';
-const BASE = {
+// ── CHART DEFAULTS ─────────────────────────────────────
+Chart.defaults.color='#7a84a8'; Chart.defaults.font.family='DM Mono';
+const BASE={
   responsive:true, maintainAspectRatio:false, animation:{duration:700},
   plugins:{
     legend:{labels:{color:'#4a5270',font:{size:10,family:'DM Mono'},boxWidth:9,padding:10}},
-    tooltip:{
-      backgroundColor:'rgba(12,15,26,.95)', borderColor:'#242a3d', borderWidth:1,
-      titleColor:'#e8ecf4', bodyColor:'#7a84a8', padding:10, cornerRadius:7,
-      titleFont:{family:'Syne',weight:700}
-    }
+    tooltip:{backgroundColor:'rgba(12,15,26,.95)',borderColor:'#242a3d',borderWidth:1,titleColor:'#e8ecf4',bodyColor:'#7a84a8',padding:10,cornerRadius:7,titleFont:{family:'Syne',weight:700}}
   }
 };
-const SCALES = {
+const SC={
   x:{ticks:{color:'#3a4260',font:{size:10}},grid:{color:'rgba(255,255,255,.025)'},border:{color:'rgba(255,255,255,.03)'}},
   y:{ticks:{color:'#3a4260',font:{size:10}},grid:{color:'rgba(255,255,255,.025)'},border:{color:'rgba(255,255,255,.03)'}}
 };
 
-// ── HELPERS ───────────────────────────────────────────────
-const num = v => { const n=parseFloat(v||0); return isNaN(n)?0:n; };
-const pctColor = p => p>=80?'#22d672':p>=50?'#4f8ef7':p>=20?'#f5a623':'#ef4444';
-const pctBg    = p => p>=80?'rgba(34,214,114,.65)':p>=50?'rgba(79,142,247,.65)':p>=20?'rgba(245,166,35,.65)':'rgba(239,68,68,.65)';
-const heatBg   = (v,max) => {
-  if(!max||!v) return 'rgba(28,33,53,.5)';
-  const r=v/max;
-  return r>.75?'rgba(34,214,114,.8)':r>.5?'rgba(79,142,247,.75)':r>.25?'rgba(245,166,35,.6)':'rgba(239,68,68,.45)';
-};
+// ── HELPERS ────────────────────────────────────────────
+const num = v=>{ const n=parseFloat(v||0); return isNaN(n)?0:n; };
+const pctColor = p=>p>=80?'#22d672':p>=50?'#4f8ef7':p>=20?'#f5a623':'#ef4444';
+const pctBg    = p=>p>=80?'rgba(34,214,114,.65)':p>=50?'rgba(79,142,247,.65)':p>=20?'rgba(245,166,35,.65)':'rgba(239,68,68,.65)';
+const heatBg   = (v,max)=>{ if(!max||!v) return 'rgba(28,33,53,.5)'; const r=v/max; return r>.75?'rgba(34,214,114,.8)':r>.5?'rgba(79,142,247,.75)':r>.25?'rgba(245,166,35,.6)':'rgba(239,68,68,.45)'; };
 
-function cells(r) {
-  return (r.c||[]).map(cell=>{
-    if(!cell) return '';
-    if(cell.f) return cell.f;
-    if(cell.v===null||cell.v===undefined) return '';
-    return String(cell.v).trim();
-  });
-}
-function popSel(id, vals) {
-  const s=document.getElementById(id); if(!s) return;
-  while(s.options.length>1) s.remove(1);
-  vals.forEach(v=>s.add(new Option(v,v)));
-}
-function mkChart(key, id, type, data, opts) {
-  if(charts[key]) charts[key].destroy();
-  const el=document.getElementById(id); if(!el) return;
-  charts[key]=new Chart(id,{type,data,options:opts});
-}
+function cells(r){ return (r.c||[]).map(cell=>{ if(!cell) return ''; if(cell.f) return cell.f; if(cell.v===null||cell.v===undefined) return ''; return String(cell.v).trim(); }); }
+function popSel(id,vals){ const s=document.getElementById(id); if(!s) return; while(s.options.length>1) s.remove(1); vals.forEach(v=>s.add(new Option(v,v))); }
+function mkChart(key,id,type,data,opts){ if(charts[key]) charts[key].destroy(); const el=document.getElementById(id); if(!el) return; charts[key]=new Chart(id,{type,data,options:opts}); }
 
-// ── ACTIVE TAB ────────────────────────────────────────────
 let currentTab='overview';
-function switchTab(tab) {
+function switchTab(tab){
   currentTab=tab;
   document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
@@ -736,76 +660,69 @@ function switchTab(tab) {
   document.getElementById('exportWrap').classList.remove('open');
 }
 
-function showErr(msg) {
+function showErr(msg){
   document.getElementById('loader').style.display='none';
   const e=document.getElementById('err');
-  e.innerHTML=`Could not load: <strong>${msg}</strong><br>
-    Go to Google Sheet → <strong>File → Share → Publish to web</strong> → Publish.<br>
-    Also check: "Anyone with the link → Viewer".`;
+  e.innerHTML=`Could not load: <strong>${msg}</strong><br>Go to Google Sheet → <strong>File → Share → Publish to web</strong> → Publish.<br>Check: "Anyone with the link → Viewer".`;
   e.style.display='block';
 }
 
-// ── FETCH ─────────────────────────────────────────────────
-async function fetchGviz(gid) {
+// ── FETCH ──────────────────────────────────────────────
+async function fetchGviz(gid){
   const url=`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${gid}&_=${Date.now()}`;
-  const res=await fetch(url);
-  if(!res.ok) throw new Error('HTTP '+res.status);
+  const res=await fetch(url); if(!res.ok) throw new Error('HTTP '+res.status);
   const txt=await res.text();
   return JSON.parse(txt.substring(txt.indexOf('{'),txt.lastIndexOf('}')+1));
 }
 
-async function loadAll() {
+async function loadAll(){
   document.getElementById('loader').style.display='flex';
   document.getElementById('app').style.display='none';
   document.getElementById('err').style.display='none';
-  try {
+  try{
     document.getElementById('ltxt').textContent='loading sheet 1…';
-    const j1=await fetchGviz(GID_S1);
-    parseSheet1(j1);
+    const j1=await fetchGviz(GID_S1); parseSheet1(j1);
     document.getElementById('ltxt').textContent='loading sheet 2…';
-    const j2=await fetchGviz(GID_S2);
-    parseSheet2(j2);
+    const j2=await fetchGviz(GID_S2); parseSheet2(j2);
     document.getElementById('loader').style.display='none';
     document.getElementById('app').style.display='block';
     document.getElementById('sub-line').innerHTML=`last updated <b>${new Date().toLocaleTimeString()}</b> · auto-refresh 60s`;
     buildOverview(); buildMonthly(); buildFaculty();
-  } catch(e) { showErr(e.message); }
+  }catch(e){ showErr(e.message); }
 }
 
-// ── PARSE SHEET 1 ─────────────────────────────────────────
-function parseSheet1(json) {
-  const t=json.table;
-  if(!t||!t.rows) throw new Error('Sheet 1 empty');
+// ── PARSE SHEET 1 ──────────────────────────────────────
+function parseSheet1(json){
+  const t=json.table; if(!t||!t.rows) throw new Error('Sheet 1 empty');
   const labels=(t.cols||[]).map(c=>(c.label||c.id||'').trim());
   monthCols=[];
   for(let i=5;i<labels.length;i++){
     const lbl=labels[i];
     const m=lbl.match(/\(([^)]+)\)/);
-    if(m){monthCols.push({label:m[1].trim(),idx:i});continue;}
-    const months=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec','january','february','march','april','june','july','august','september','october','november','december'];
-    if(months.some(mn=>lbl.toLowerCase().includes(mn))){
+    if(m){ monthCols.push({label:m[1].trim(),idx:i}); continue; }
+    const mons=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec','january','february','march','april','june','july','august','september','october','november','december'];
+    if(mons.some(mn=>lbl.toLowerCase().includes(mn))){
       monthCols.push({label:lbl.replace(/video\s*solutions?\s*completed\s*/gi,'').replace(/[()]/g,'').trim()||lbl,idx:i});
     }
   }
   s1Rows=(t.rows||[]).map(r=>{
     const c=cells(r);
     const row={project:(c[0]||'').trim(),subject:(c[1]||'').trim(),status:(c[2]||'').trim(),req:num(c[3]),done:num(c[4]),months:{}};
-    monthCols.forEach(mc=>{row.months[mc.label]=num(c[mc.idx]);});
+    monthCols.forEach(mc=>{ row.months[mc.label]=num(c[mc.idx]); });
     return row;
   }).filter(r=>r.project||r.subject);
 }
 
-// ── PARSE SHEET 2 ─────────────────────────────────────────
-function parseSheet2(json) {
-  facRows=[];
-  const t=json.table; if(!t) return;
+// ── PARSE SHEET 2 ──────────────────────────────────────
+function parseSheet2(json){
+  facRows=[]; const t=json.table; if(!t) return;
   const labels=(t.cols||[]).map(c=>(c.label||c.id||'').trim());
   const groups=[];
   for(let c=0;c<labels.length;c++){
     const lk=slug(labels[c]);
     if(lk==='faculties'||lk==='faculty'){
-      const projName=(labels[c-1]||'').replace(/\bchapter\s*name\b/gi,'').replace(/\bsubject\b/gi,'').trim();
-      groups.push({project:projName||`Project_col${c}`,subjectCol:c-1,facultyCol:c,reqCol:c+1,doneCol:c+2});
+      const pn=(labels[c-1]||'').replace(/\bchapter\s*name\b/gi,'').replace(/\bsubject\b/gi,'').trim();
+      groups.push({project:pn||`Project_col${c}`,subjectCol:c-1,facultyCol:c,reqCol:c+1,doneCol:c+2});
     }
   }
   for(const row of (t.rows||[]).map(r=>cells(r))){
@@ -819,8 +736,8 @@ function parseSheet2(json) {
   }
 }
 
-// ── BUILD OVERVIEW ────────────────────────────────────────
-function buildOverview() {
+// ── OVERVIEW ───────────────────────────────────────────
+function buildOverview(){
   const rows=s1Rows;
   const tReq=rows.reduce((s,r)=>s+r.req,0), tDon=rows.reduce((s,r)=>s+r.done,0);
   const pct=tReq>0?Math.round(tDon/tReq*100):0;
@@ -829,8 +746,8 @@ function buildOverview() {
 
   document.getElementById('k-done').textContent=tDon;
   document.getElementById('k-rem').textContent=Math.max(0,tReq-tDon);
-  const dSub=document.getElementById('k-done-sub'); if(dSub) dSub.textContent=`of ${tReq} required`;
-  const rSub=document.getElementById('k-rem-sub');  if(rSub) rSub.textContent=`across ${projs.length} projects`;
+  document.getElementById('k-done-sub').textContent=`of ${tReq} required`;
+  document.getElementById('k-rem-sub').textContent=`across ${projs.length} projects`;
   setTimeout(()=>{
     document.getElementById('pf-main').style.width=pct+'%';
     document.getElementById('ov-pct').textContent=pct+'%';
@@ -838,56 +755,60 @@ function buildOverview() {
     document.getElementById('pn-req').textContent=tReq;
   },200);
 
-  popSel('s1-proj',projs.sort());
-  popSel('s1-subj',subjs.sort());
+  popSel('s1-proj',projs.sort()); popSel('s1-subj',subjs.sort());
   popSel('s1-stat',[...new Set(rows.map(r=>r.status).filter(Boolean))].sort());
 
+  // Projects bar
   const pR={},pD={};
-  rows.forEach(r=>{if(!r.project) return; pR[r.project]=(pR[r.project]||0)+r.req; pD[r.project]=(pD[r.project]||0)+r.done;});
+  rows.forEach(r=>{ if(!r.project) return; pR[r.project]=(pR[r.project]||0)+r.req; pD[r.project]=(pD[r.project]||0)+r.done; });
   const pK=Object.keys(pR).sort();
   mkChart('pb','c-proj-bar','bar',{labels:pK,datasets:[
     {label:'Required',data:pK.map(k=>pR[k]),backgroundColor:'rgba(79,142,247,.5)',borderColor:'rgba(79,142,247,.7)',borderWidth:1,borderRadius:4,borderSkipped:false},
     {label:'Completed',data:pK.map(k=>pD[k]),backgroundColor:'rgba(34,214,114,.5)',borderColor:'rgba(34,214,114,.7)',borderWidth:1,borderRadius:4,borderSkipped:false}
-  ]},{...BASE,scales:SCALES});
+  ]},{...BASE,scales:SC});
 
+  // Status doughnut
   const stC={};
-  rows.forEach(r=>{if(r.status) stC[r.status]=(stC[r.status]||0)+1;});
+  rows.forEach(r=>{ if(r.status) stC[r.status]=(stC[r.status]||0)+1; });
   mkChart('st','c-status','doughnut',{labels:Object.keys(stC),datasets:[{data:Object.values(stC),backgroundColor:C,borderWidth:0,hoverOffset:10}]},
     {...BASE,cutout:'65%',plugins:{...BASE.plugins,legend:{position:'bottom',labels:{color:'#4a5270',font:{size:9,family:'DM Mono'},boxWidth:8,padding:8}}}});
 
+  // Subject doughnut
   const suC={};
-  rows.forEach(r=>{if(r.subject) suC[r.subject]=(suC[r.subject]||0)+1;});
+  rows.forEach(r=>{ if(r.subject) suC[r.subject]=(suC[r.subject]||0)+1; });
   mkChart('su','c-subject','doughnut',{labels:Object.keys(suC),datasets:[{data:Object.values(suC),backgroundColor:C,borderWidth:0,hoverOffset:10}]},
     {...BASE,cutout:'65%',plugins:{...BASE.plugins,legend:{position:'bottom',labels:{color:'#4a5270',font:{size:9,family:'DM Mono'},boxWidth:8,padding:8}}}});
 
+  // Completion % bar
   const pp=pK.map(k=>pR[k]>0?Math.round(pD[k]/pR[k]*100):0);
   mkChart('pp','c-proj-pct','bar',{labels:pK,datasets:[{label:'% Done',data:pp,backgroundColor:pp.map(pctBg),borderRadius:4,borderSkipped:false}]},
-    {...BASE,indexAxis:'y',plugins:{...BASE.plugins,legend:{display:false}},scales:{x:{...SCALES.x,max:100,ticks:{...SCALES.x.ticks,callback:v=>v+'%'}},y:SCALES.y}});
+    {...BASE,indexAxis:'y',plugins:{...BASE.plugins,legend:{display:false}},scales:{x:{...SC.x,max:100,ticks:{...SC.x.ticks,callback:v=>v+'%'}},y:SC.y}});
 
+  // Subject done bar
   const suD={};
-  rows.forEach(r=>{if(r.subject) suD[r.subject]=(suD[r.subject]||0)+r.done;});
+  rows.forEach(r=>{ if(r.subject) suD[r.subject]=(suD[r.subject]||0)+r.done; });
   const suK=Object.keys(suD).sort((a,b)=>suD[b]-suD[a]).slice(0,10);
   mkChart('sd','c-subj-done','bar',{labels:suK,datasets:[{label:'Completed',data:suK.map(k=>suD[k]),backgroundColor:suK.map((_,i)=>C[i%C.length]+'cc'),borderRadius:4,borderSkipped:false}]},
-    {...BASE,indexAxis:'y',plugins:{...BASE.plugins,legend:{display:false}},scales:SCALES});
+    {...BASE,indexAxis:'y',plugins:{...BASE.plugins,legend:{display:false}},scales:SC});
 
+  // Monthly stacked bar
   if(monthCols.length){
-    const mLabels=monthCols.map(m=>m.label);
-    const mTotals=monthCols.map(mc=>rows.reduce((s,r)=>s+(r.months[mc.label]||0),0));
-    const mMax=Math.max(...mTotals);
-    const datasets=projs.map((proj,i)=>({
+    const mL=monthCols.map(m=>m.label);
+    const mT=monthCols.map(mc=>rows.reduce((s,r)=>s+(r.months[mc.label]||0),0));
+    const mMax=Math.max(...mT);
+    mkChart('ovmonth','c-monthly-bar','bar',{labels:mL,datasets:projs.map((proj,i)=>({
       label:proj,
       data:monthCols.map(mc=>rows.filter(r=>r.project===proj).reduce((s,r)=>s+(r.months[mc.label]||0),0)),
       backgroundColor:C[i%C.length]+'88',borderColor:C[i%C.length],borderWidth:1,borderRadius:3,borderSkipped:false
-    }));
-    mkChart('ovmonth','c-monthly-bar','bar',{labels:mLabels,datasets},{
+    }))},{
       ...BASE,
-      scales:{x:{...SCALES.x,stacked:true},y:{...SCALES.y,stacked:true,ticks:{...SCALES.y.ticks,callback:v=>v.toLocaleString()}}},
+      scales:{x:{...SC.x,stacked:true},y:{...SC.y,stacked:true,ticks:{...SC.y.ticks,callback:v=>v.toLocaleString()}}},
       plugins:{...BASE.plugins,legend:{position:'bottom',labels:{color:'#4a5270',font:{size:9,family:'DM Mono'},boxWidth:8,padding:8}},
         tooltip:{...BASE.plugins.tooltip,callbacks:{footer:items=>`Total: ${items.reduce((s,i)=>s+i.parsed.y,0)}`}}}
     });
-    const legendEl=document.getElementById('ov-month-legend');
-    if(legendEl) legendEl.innerHTML=mLabels.map((lbl,i)=>{
-      const v=mTotals[i],clr=pctColor(mMax>0?Math.round(v/mMax*100):0);
+    const leg=document.getElementById('ov-month-legend');
+    if(leg) leg.innerHTML=mL.map((lbl,i)=>{
+      const v=mT[i],clr=pctColor(mMax>0?Math.round(v/mMax*100):0);
       return `<div style="background:var(--surface2);border:1px solid var(--line2);border-radius:7px;padding:5px 12px;text-align:center">
         <div style="font-family:var(--fd);font-size:.9rem;font-weight:800;color:${clr}">${v.toLocaleString()}</div>
         <div style="font-family:var(--fm);font-size:.55rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">${lbl}</div>
@@ -896,155 +817,269 @@ function buildOverview() {
   } else {
     document.getElementById('ov-monthly-card').style.display='none';
   }
+
+  renderTopFaculties('overview');
   renderT1();
 }
 
-// ── BUILD MONTHLY ─────────────────────────────────────────
-function buildMonthly() {
-  if(!monthCols.length){
-    document.getElementById('tab-monthly').innerHTML=
-      '<div style="padding:48px;text-align:center;color:var(--muted);font-family:var(--fm);font-size:.8rem">No monthly columns found.</div>';
+// ── TOP FACULTIES LEADERBOARD ──────────────────────────
+function buildFacMap(){
+  const m={};
+  facRows.forEach(r=>{
+    if(!m[r.faculty]) m[r.faculty]={req:0,done:0,projects:new Set()};
+    m[r.faculty].req+=r.req; m[r.faculty].done+=r.done; m[r.faculty].projects.add(r.project);
+  });
+  return m;
+}
+
+function renderTopFaculties(target){
+  const fMap=buildFacMap();
+  if(!Object.keys(fMap).length){ document.getElementById('ov-top-fac-card').style.display='none'; return; }
+  const fNames=Object.keys(fMap);
+  const sorted=fNames.slice().sort((a,b)=>facSortByRate
+    ? (fMap[b].req>0?fMap[b].done/fMap[b].req:0)-(fMap[a].req>0?fMap[a].done/fMap[a].req:0)
+    : fMap[b].done-fMap[a].done
+  ).slice(0,10);
+  const maxDone=Math.max(...sorted.map(f=>fMap[f].done),1);
+  const rankClasses=['r1','r2','r3'];
+  const medals=['🥇','🥈','🥉'];
+  const list=document.getElementById('ov-top-fac-list'); if(!list) return;
+  list.innerHTML=sorted.map((name,i)=>{
+    const fm=fMap[name], p=fm.req>0?Math.round(fm.done/fm.req*100):0;
+    const clr=pctColor(p), barW=Math.round(fm.done/maxDone*100);
+    const rc=rankClasses[i]||'rn';
+    const rankLabel=i<3?medals[i]:`#${i+1}`;
+    return `<div class="tfac-row">
+      <div class="tfac-rank ${rc}">${rankLabel}</div>
+      <div class="tfac-info">
+        <div class="tfac-name">${name}</div>
+        <div class="tfac-meta">${[...fm.projects].join(' · ')}</div>
+      </div>
+      <div class="tfac-bar-wrap">
+        <div class="tfac-bar-track"><div class="tfac-bar-fill" style="width:${barW}%;background:${clr}"></div></div>
+        <div class="tfac-bar-sub">${fm.done} of ${fm.req} assigned · ${p}%</div>
+      </div>
+      <div class="tfac-val" style="color:${clr}">${fm.done}</div>
+    </div>`;
+  }).join('');
+}
+
+let facSortToggle=false;
+function toggleFacSort(){
+  facSortByRate=!facSortByRate;
+  const btn=document.getElementById('tfac-sort-btn');
+  if(btn) btn.textContent=facSortByRate?'Completion % ↓':'Completed ↓';
+  renderTopFaculties('overview');
+}
+
+// ── FACULTY MONTHLY PERFORMANCE ───────────────────────
+function renderFacMonthlyBoard(month){
+  const list=document.getElementById('fac-monthly-list');
+  const sub=document.getElementById('fac-monthly-board-sub');
+  if(!list) return;
+
+  if(!month){
+    // Show overall totals when no month selected
+    sub.textContent='top faculties by total output — select month to filter';
+    renderTopFaculties('overview');
+    // Reuse the same logic but render in fac-monthly-list
+    const fMap=buildFacMap();
+    if(!Object.keys(fMap).length){ list.innerHTML='<div style="color:var(--muted);font-family:var(--fm);font-size:.72rem;padding:12px">No data.</div>'; return; }
+    const sorted=Object.keys(fMap).sort((a,b)=>fMap[b].done-fMap[a].done).slice(0,10);
+    const maxDone=Math.max(...sorted.map(f=>fMap[f].done),1);
+    const medals=['🥇','🥈','🥉'];
+    const rankClasses=['r1','r2','r3'];
+    list.innerHTML=sorted.map((name,i)=>{
+      const fm=fMap[name],p=fm.req>0?Math.round(fm.done/fm.req*100):0;
+      const clr=pctColor(p),barW=Math.round(fm.done/maxDone*100);
+      return `<div class="tfac-row">
+        <div class="tfac-rank ${rankClasses[i]||'rn'}">${i<3?medals[i]:'#'+(i+1)}</div>
+        <div class="tfac-info"><div class="tfac-name">${name}</div><div class="tfac-meta">${[...fm.projects].join(' · ')}</div></div>
+        <div class="tfac-bar-wrap"><div class="tfac-bar-track"><div class="tfac-bar-fill" style="width:${barW}%;background:${clr}"></div></div><div class="tfac-bar-sub">${fm.done} done · ${p}% rate</div></div>
+        <div class="tfac-val" style="color:${clr}">${fm.done}</div>
+      </div>`;
+    }).join('');
     return;
   }
-  const mLabels=monthCols.map(m=>m.label);
-  const mTotals=monthCols.map(mc=>s1Rows.reduce((s,r)=>s+(r.months[mc.label]||0),0));
-  const bestIdx=mTotals.indexOf(Math.max(...mTotals));
-  const mAvg=mTotals.length?Math.round(mTotals.reduce((a,b)=>a+b,0)/mTotals.length):0;
 
-  document.getElementById('mk-best').textContent=mTotals[bestIdx]||0;
-  document.getElementById('mk-best-name').textContent=mLabels[bestIdx]||'–';
+  // Month selected: rank faculties by their s1Rows contribution in that month
+  sub.textContent=`top faculties by output in ${month}`;
+  // We don't have per-faculty monthly data in sheet2, so use sheet1 monthly totals per project per subject
+  // and cross-reference with faculty assignments to estimate contributions
+  // Since sheet1 has project+subject+month and sheet2 has faculty+project+subject,
+  // we join on project+subject to assign monthly credits to faculty
+  const facMonthMap={};
+  facRows.forEach(r=>{
+    const key=r.project+'||'+r.subject;
+    if(!facMonthMap[r.faculty]) facMonthMap[r.faculty]={monthDone:0,projects:new Set(),req:0,done:0};
+    facMonthMap[r.faculty].projects.add(r.project);
+    facMonthMap[r.faculty].req+=r.req;
+    facMonthMap[r.faculty].done+=r.done;
+    // Find matching s1Row for this month
+    const s1=s1Rows.find(s=>s.project===r.project&&s.subject===r.subject);
+    if(s1&&s1.months[month]){
+      // Distribute month credit proportionally if multiple faculties on same project/subject
+      const sameSubjFacs=facRows.filter(fr=>fr.project===r.project&&fr.subject===r.subject);
+      const totalAssigned=sameSubjFacs.reduce((t,f)=>t+f.req,0);
+      const share=totalAssigned>0?(r.req/totalAssigned)*s1.months[month]:0;
+      facMonthMap[r.faculty].monthDone+=share;
+    }
+  });
+  const names=Object.keys(facMonthMap).filter(f=>facMonthMap[f].monthDone>0);
+  if(!names.length){
+    list.innerHTML=`<div style="color:var(--muted);font-family:var(--fm);font-size:.72rem;padding:20px;text-align:center">No monthly data found for ${month}.</div>`;
+    return;
+  }
+  const sorted=names.sort((a,b)=>facMonthMap[b].monthDone-facMonthMap[a].monthDone).slice(0,10);
+  const maxV=Math.max(...sorted.map(f=>facMonthMap[f].monthDone),1);
+  const medals=['🥇','🥈','🥉'];
+  const rankClasses=['r1','r2','r3'];
+  list.innerHTML=sorted.map((name,i)=>{
+    const fm=facMonthMap[name];
+    const v=Math.round(fm.monthDone);
+    const barW=Math.round(fm.monthDone/maxV*100);
+    const clr=C[i%C.length];
+    return `<div class="tfac-row">
+      <div class="tfac-rank ${rankClasses[i]||'rn'}">${i<3?medals[i]:'#'+(i+1)}</div>
+      <div class="tfac-info"><div class="tfac-name">${name}</div><div class="tfac-meta">${[...fm.projects].join(' · ')}</div></div>
+      <div class="tfac-bar-wrap"><div class="tfac-bar-track"><div class="tfac-bar-fill" style="width:${barW}%;background:${clr}"></div></div><div class="tfac-bar-sub">${v} completed in ${month}</div></div>
+      <div class="tfac-val" style="color:${clr}">${v}</div>
+    </div>`;
+  }).join('');
+}
+
+function onFacMonthChange(){
+  facMonthActive=document.getElementById('fac-month-ddl').value;
+  renderFacMonthlyBoard(facMonthActive);
+}
+
+// ── MONTHLY TAB ────────────────────────────────────────
+function buildMonthly(){
+  if(!monthCols.length){
+    document.getElementById('tab-monthly').innerHTML='<div style="padding:48px;text-align:center;color:var(--muted);font-family:var(--fm);font-size:.8rem">No monthly columns found in Sheet 1.</div>';
+    return;
+  }
+  const mL=monthCols.map(m=>m.label);
+  const mT=monthCols.map(mc=>s1Rows.reduce((s,r)=>s+(r.months[mc.label]||0),0));
+  const bestIdx=mT.indexOf(Math.max(...mT));
+  const mAvg=mT.length?Math.round(mT.reduce((a,b)=>a+b,0)/mT.length):0;
+
+  document.getElementById('mk-best').textContent=mT[bestIdx]||0;
+  document.getElementById('mk-best-name').textContent=mL[bestIdx]||'–';
   document.getElementById('mk-avg').textContent=mAvg;
 
-  // Detect current month
-  const monthNames=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
-  const currentMonthShort=monthNames[new Date().getMonth()];
-  const currentMonthFull=['january','february','march','april','may','june','july','august','september','october','november','december'][new Date().getMonth()];
-  const currentYear=String(new Date().getFullYear()).slice(-2); // e.g. "25"
-  const fullYear=String(new Date().getFullYear()); // e.g. "2025"
-
-  // Find best matching month label
-  let defaultMonth='';
-  for(const lbl of mLabels){
-    const ll=lbl.toLowerCase();
-    if(ll.includes(currentMonthShort)||ll.includes(currentMonthFull)){
-      defaultMonth=lbl; break;
-    }
-  }
-  // Fall back to latest month
-  if(!defaultMonth) defaultMonth=mLabels[mLabels.length-1];
-
-  // Pills
-  const pillRow=document.getElementById('month-pills'); pillRow.innerHTML='';
-  const allPill=document.createElement('button');
-  allPill.className='pill'; allPill.textContent='All'; allPill.dataset.month='';
-  allPill.onclick=()=>setActiveMonth(''); pillRow.appendChild(allPill);
-  mLabels.forEach(lbl=>{
-    const btn=document.createElement('button');
-    btn.className='pill'; btn.textContent=lbl; btn.dataset.month=lbl;
-    btn.onclick=()=>setActiveMonth(lbl); pillRow.appendChild(btn);
-  });
+  // Populate main month dropdown
+  const ddl=document.getElementById('month-main-ddl');
+  while(ddl.options.length>1) ddl.remove(1);
+  mL.forEach(lbl=>ddl.add(new Option(lbl,lbl)));
 
   popSel('sm-proj',[...new Set(s1Rows.map(r=>r.project).filter(Boolean))].sort());
   popSel('sm-subj',[...new Set(s1Rows.map(r=>r.subject).filter(Boolean))].sort());
-  popSel('sm-month',mLabels);
 
-  // Trend bar
+  // Detect current month and auto-select
+  const monthNames=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+  const curShort=monthNames[new Date().getMonth()];
+  const curFull=['january','february','march','april','may','june','july','august','september','october','november','december'][new Date().getMonth()];
+  let defMonth='';
+  for(const lbl of mL){ const ll=lbl.toLowerCase(); if(ll.includes(curShort)||ll.includes(curFull)){defMonth=lbl;break;} }
+  if(!defMonth) defMonth=mL[mL.length-1];
+  ddl.value=defMonth;
+
+  // Charts (always visible)
   mkChart('mtrend','mc-trend','bar',{
-    labels:mLabels,
-    datasets:[{label:'Completed',data:mTotals,backgroundColor:mLabels.map((_,i)=>C[i%C.length]+'aa'),borderColor:mLabels.map((_,i)=>C[i%C.length]),borderWidth:1,borderRadius:4,borderSkipped:false}]
-  },{...BASE,plugins:{...BASE.plugins,legend:{display:false}},scales:SCALES});
+    labels:mL,
+    datasets:[{label:'Completed',data:mT,backgroundColor:mL.map((_,i)=>C[i%C.length]+'aa'),borderColor:mL.map((_,i)=>C[i%C.length]),borderWidth:1,borderRadius:4,borderSkipped:false}]
+  },{...BASE,plugins:{...BASE.plugins,legend:{display:false}},scales:SC});
 
   const allSubjs=[...new Set(s1Rows.map(r=>r.subject).filter(Boolean))];
   mkChart('msubjstack','mc-subj-stack','bar',{
-    labels:mLabels,
+    labels:mL,
     datasets:allSubjs.map((subj,i)=>({
-      label:subj,backgroundColor:C[i%C.length]+'99',
-      data:monthCols.map(mc=>s1Rows.filter(r=>r.subject===subj).reduce((s,r)=>s+(r.months[mc.label]||0),0)),
-      borderRadius:2,borderSkipped:false
+      label:subj,backgroundColor:C[i%C.length]+'99',borderRadius:2,borderSkipped:false,
+      data:monthCols.map(mc=>s1Rows.filter(r=>r.subject===subj).reduce((s,r)=>s+(r.months[mc.label]||0),0))
     }))
-  },{...BASE,scales:{...SCALES,x:{...SCALES.x,stacked:true},y:{...SCALES.y,stacked:true}},
-    plugins:{...BASE.plugins,legend:{labels:{color:'#4a5270',font:{size:9,family:'DM Mono'},boxWidth:8,padding:8}}}});
+  },{...BASE,scales:{...SC,x:{...SC.x,stacked:true},y:{...SC.y,stacked:true}},plugins:{...BASE.plugins,legend:{labels:{color:'#4a5270',font:{size:9,family:'DM Mono'},boxWidth:8,padding:8}}}});
 
   buildHeatmap();
-
-  // Set default to current month
-  setActiveMonth(defaultMonth);
-  renderTM();
+  setActiveMonth(defMonth);
 }
 
-function toggleProjTrend() {
+function setActiveMonth(month){
+  activeMonth=month;
+  const drill=document.getElementById('month-drill');
+  const hint=document.getElementById('month-no-sel-hint');
+  const badge=document.getElementById('month-active-badge');
+  if(month){
+    drill.classList.remove('hidden');
+    hint.style.display='none';
+    badge.style.display='inline';
+    badge.textContent='● '+month;
+    buildDrillDown(month);
+    renderTM();
+  } else {
+    drill.classList.add('hidden');
+    hint.style.display='block';
+    badge.style.display='none';
+  }
+}
+
+function onMonthDDL(){
+  const v=document.getElementById('month-main-ddl').value;
+  setActiveMonth(v);
+}
+
+function toggleProjTrend(){
   projTrendOpen=!projTrendOpen;
   const col=document.getElementById('proj-trend-collapsible');
   const btn=document.getElementById('proj-trend-toggle');
   col.classList.toggle('open',projTrendOpen);
   btn.classList.toggle('open',projTrendOpen);
   btn.innerHTML=projTrendOpen
-    ? `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 8l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Hide trends`
-    : `<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Show trends`;
-
-  if(projTrendOpen && !charts['mprojtrend']) {
-    const mLabels=monthCols.map(m=>m.label);
+    ?`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 8l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Hide trends`
+    :`<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Show trends`;
+  if(projTrendOpen&&!charts['mprojtrend']){
+    const mL=monthCols.map(m=>m.label);
     const allProjs=[...new Set(s1Rows.map(r=>r.project).filter(Boolean))];
     mkChart('mprojtrend','mc-proj-trend','line',{
-      labels:mLabels,
+      labels:mL,
       datasets:allProjs.map((proj,i)=>({
-        label:proj,
-        data:monthCols.map(mc=>s1Rows.filter(r=>r.project===proj).reduce((s,r)=>s+(r.months[mc.label]||0),0)),
-        borderColor:C[i%C.length],backgroundColor:C[i%C.length]+'18',
-        fill:false,tension:.4,borderWidth:2,pointRadius:4,pointHoverRadius:6,
-        pointBackgroundColor:C[i%C.length]
+        label:proj,borderColor:C[i%C.length],backgroundColor:C[i%C.length]+'18',fill:false,tension:.4,borderWidth:2,pointRadius:4,pointHoverRadius:6,pointBackgroundColor:C[i%C.length],
+        data:monthCols.map(mc=>s1Rows.filter(r=>r.project===proj).reduce((s,r)=>s+(r.months[mc.label]||0),0))
       }))
-    },{...BASE,scales:SCALES,plugins:{...BASE.plugins,legend:{labels:{color:'#4a5270',font:{size:9,family:'DM Mono'},boxWidth:8,padding:8}}}});
+    },{...BASE,scales:SC,plugins:{...BASE.plugins,legend:{labels:{color:'#4a5270',font:{size:9,family:'DM Mono'},boxWidth:8,padding:8}}}});
   }
 }
 
-function buildHeatmap() {
+function buildHeatmap(){
   const container=document.getElementById('heatmap-container');
   if(!container||!monthCols.length) return;
   const projs=[...new Set(s1Rows.map(r=>r.project).filter(Boolean))];
-  const mLabels=monthCols.map(m=>m.label);
-  let globalMax=0;
-  const matrix={};
+  const mL=monthCols.map(m=>m.label);
+  let gMax=0; const matrix={};
   projs.forEach(proj=>{
     matrix[proj]={};
-    mLabels.forEach(mo=>{
-      const val=s1Rows.filter(r=>r.project===proj).reduce((s,r)=>s+(r.months[mo]||0),0);
-      matrix[proj][mo]=val; if(val>globalMax) globalMax=val;
-    });
+    mL.forEach(mo=>{ const v=s1Rows.filter(r=>r.project===proj).reduce((s,r)=>s+(r.months[mo]||0),0); matrix[proj][mo]=v; if(v>gMax) gMax=v; });
   });
-  const cellW=Math.max(58,Math.floor((window.innerWidth-280)/mLabels.length));
-  let html=`<div style="display:grid;grid-template-columns:170px ${mLabels.map(()=>cellW+'px').join(' ')};gap:4px;min-width:${170+cellW*mLabels.length+4*mLabels.length}px;padding:6px 0">`;
-  html+=`<div></div>`;
-  mLabels.forEach(mo=>{html+=`<div class="hm-hdr">${mo}</div>`;});
+  const cW=Math.max(58,Math.floor((window.innerWidth-280)/mL.length));
+  let html=`<div style="display:grid;grid-template-columns:170px ${mL.map(()=>cW+'px').join(' ')};gap:4px;min-width:${170+cW*mL.length+4*mL.length}px;padding:6px 0">`;
+  html+=`<div></div>`; mL.forEach(mo=>{html+=`<div class="hm-hdr">${mo}</div>`;});
   projs.forEach(proj=>{
     html+=`<div class="hm-lbl">${proj}</div>`;
-    mLabels.forEach(mo=>{
-      const v=matrix[proj][mo];
-      html+=`<div class="hm-cell" style="background:${heatBg(v,globalMax)}" title="${proj} · ${mo}: ${v}">${v||''}</div>`;
-    });
+    mL.forEach(mo=>{ const v=matrix[proj][mo]; html+=`<div class="hm-cell" style="background:${heatBg(v,gMax)}" title="${proj}·${mo}: ${v}">${v||''}</div>`; });
   });
   html+='</div>'; container.innerHTML=html;
 }
 
-function setActiveMonth(month) {
-  activeMonth=month;
-  document.querySelectorAll('.pill').forEach(p=>p.classList.toggle('active',p.dataset.month===month));
-  const sel=document.getElementById('sm-month'); if(sel) sel.value=month;
-  buildDrillDown(month||monthCols[monthCols.length-1]?.label||'');
-  renderTM();
-}
-function onMonthSelectChange() { setActiveMonth(document.getElementById('sm-month').value); }
-
-function buildDrillDown(month) {
+function buildDrillDown(month){
   if(!month) return;
   document.getElementById('drill-title').textContent=month+' — breakdown';
   document.getElementById('mc-drill-title').textContent=month+': by project';
-  document.getElementById('mtbl-title').textContent='Monthly Records'+(activeMonth?' — '+activeMonth:'');
+  document.getElementById('mtbl-title').textContent='Records — '+month;
   const rows=s1Rows.filter(r=>r.months[month]!==undefined);
   const total=rows.reduce((s,r)=>s+(r.months[month]||0),0);
   const projs=[...new Set(rows.map(r=>r.project).filter(Boolean))];
   const subjs=[...new Set(rows.map(r=>r.subject).filter(Boolean))];
-  const bestProj=projs.sort((a,b)=>rows.filter(r=>r.project===b).reduce((s,r)=>s+r.months[month],0)-rows.filter(r=>r.project===a).reduce((s,r)=>s+r.months[month],0))[0]||'–';
+  const bestProj=projs.sort((a,b)=>rows.filter(r=>r.project===b).reduce((s,r)=>s+(r.months[month]||0),0)-rows.filter(r=>r.project===a).reduce((s,r)=>s+(r.months[month]||0),0))[0]||'–';
   document.getElementById('month-stat-cards').innerHTML=[
     {label:'Total Completed',val:total,sub:'in '+month,clr:'var(--accent)'},
     {label:'Projects Active',val:projs.length,sub:'contributing',clr:'var(--accent2)'},
@@ -1052,25 +1087,24 @@ function buildDrillDown(month) {
     {label:'Subjects Active',val:subjs.length,sub:'unique subjects',clr:'var(--purple)'},
   ].map(c=>`<div class="msc" style="border-left:2px solid ${c.clr}">
     <div class="msc-lbl">${c.label}</div>
-    <div class="msc-val" style="${c.small?'font-size:1rem;':''}color:${c.clr}">${c.val}</div>
+    <div class="msc-val" style="${c.small?'font-size:.95rem;':''}color:${c.clr}">${c.val}</div>
     <div class="msc-sub">${c.sub}</div>
   </div>`).join('');
 
-  const projTotals={};
-  rows.forEach(r=>{if(r.project) projTotals[r.project]=(projTotals[r.project]||0)+(r.months[month]||0);});
-  const pK=Object.keys(projTotals).sort((a,b)=>projTotals[b]-projTotals[a]);
-  mkChart('mdrillp','mc-drill-proj','bar',{labels:pK,datasets:[{label:'Completed',data:pK.map(k=>projTotals[k]),backgroundColor:pK.map((_,i)=>C[i%C.length]+'aa'),borderColor:pK.map((_,i)=>C[i%C.length]),borderWidth:1,borderRadius:4,borderSkipped:false}]},
-    {...BASE,indexAxis:'y',plugins:{...BASE.plugins,legend:{display:false}},scales:SCALES});
+  const pT={};
+  rows.forEach(r=>{ if(r.project) pT[r.project]=(pT[r.project]||0)+(r.months[month]||0); });
+  const pK=Object.keys(pT).sort((a,b)=>pT[b]-pT[a]);
+  mkChart('mdrillp','mc-drill-proj','bar',{labels:pK,datasets:[{label:'Completed',data:pK.map(k=>pT[k]),backgroundColor:pK.map((_,i)=>C[i%C.length]+'aa'),borderColor:pK.map((_,i)=>C[i%C.length]),borderWidth:1,borderRadius:4,borderSkipped:false}]},
+    {...BASE,indexAxis:'y',plugins:{...BASE.plugins,legend:{display:false}},scales:SC});
 
-  const subjTotals={};
-  rows.forEach(r=>{if(r.subject) subjTotals[r.subject]=(subjTotals[r.subject]||0)+(r.months[month]||0);});
-  const sK=Object.keys(subjTotals).sort((a,b)=>subjTotals[b]-subjTotals[a]);
-  mkChart('mdrills','mc-drill-subj','bar',{labels:sK,datasets:[{label:'Completed',data:sK.map(k=>subjTotals[k]),backgroundColor:sK.map((_,i)=>C[i%C.length]+'aa'),borderColor:sK.map((_,i)=>C[i%C.length]),borderWidth:1,borderRadius:4,borderSkipped:false}]},
-    {...BASE,indexAxis:'y',plugins:{...BASE.plugins,legend:{display:false}},scales:SCALES});
+  const sT={};
+  rows.forEach(r=>{ if(r.subject) sT[r.subject]=(sT[r.subject]||0)+(r.months[month]||0); });
+  const sK=Object.keys(sT).sort((a,b)=>sT[b]-sT[a]);
+  mkChart('mdrills','mc-drill-subj','bar',{labels:sK,datasets:[{label:'Completed',data:sK.map(k=>sT[k]),backgroundColor:sK.map((_,i)=>C[i%C.length]+'aa'),borderColor:sK.map((_,i)=>C[i%C.length]),borderWidth:1,borderRadius:4,borderSkipped:false}]},
+    {...BASE,indexAxis:'y',plugins:{...BASE.plugins,legend:{display:false}},scales:SC});
 }
 
-// ── MONTHLY TABLE ─────────────────────────────────────────
-function renderTM() {
+function renderTM(){
   const fP=(document.getElementById('sm-proj')||{}).value||'';
   const fS=(document.getElementById('sm-subj')||{}).value||'';
   const sq=((document.getElementById('sm-search')||{}).value||'').toLowerCase();
@@ -1089,15 +1123,13 @@ function renderTM() {
   const dm=fM?monthCols.filter(m=>m.label===fM):monthCols;
   const tb=document.getElementById('tbm'); tb.innerHTML='';
   data.forEach(r=>{
-    const p=r.req>0?Math.round(r.done/r.req*100):0;
-    const fc=pctColor(p);
-    const mCells=dm.map(mc=>{const v=r.months[mc.label]||0;return `<td style="color:${v?'var(--warn)':'var(--muted)'};font-family:var(--fm)">${v||'–'}</td>`;}).join('');
+    const p=r.req>0?Math.round(r.done/r.req*100):0,fc=pctColor(p);
+    const mCells=dm.map(mc=>{ const v=r.months[mc.label]||0; return `<td style="color:${v?'var(--warn)':'var(--muted)'};font-family:var(--fm)">${v||'–'}</td>`; }).join('');
     const tr=document.createElement('tr');
     tr.innerHTML=`<td class="w">${r.project||'–'}</td><td class="w">${r.subject||'–'}</td>
       <td><span class="badge b-${slug(r.status)}">${r.status||'–'}</span></td>
       <td style="color:var(--accent2);font-family:var(--fm)">${r.req}</td>
-      <td style="color:var(--accent);font-family:var(--fm)">${r.done}</td>
-      ${mCells}
+      <td style="color:var(--accent);font-family:var(--fm)">${r.done}</td>${mCells}
       <td><div class="mp"><div class="mp-track"><div class="mp-fill" style="width:${p}%;background:${fc}"></div></div><span class="mp-lbl">${p}%</span></div></td>`;
     tb.appendChild(tr);
   });
@@ -1105,20 +1137,16 @@ function renderTM() {
   if(rc) rc.textContent=`${data.length} of ${s1Rows.length} records${fM?' · '+fM:''}`;
 }
 
-// ── BUILD FACULTY ─────────────────────────────────────────
-function buildFaculty() {
+// ── FACULTY TAB ────────────────────────────────────────
+function buildFaculty(){
   const rows=facRows;
   if(!rows.length){
-    document.getElementById('fac-cards').innerHTML='<div style="grid-column:1/-1;padding:32px;text-align:center;color:var(--muted);font-family:var(--fm);font-size:.75rem">No faculty data found.</div>';
+    document.getElementById('fac-cards').innerHTML='<div style="grid-column:1/-1;padding:32px;text-align:center;color:var(--muted);font-family:var(--fm)">No faculty data found.</div>';
     return;
   }
-  const fMap={};
-  rows.forEach(r=>{
-    if(!fMap[r.faculty]) fMap[r.faculty]={req:0,done:0,projects:new Set()};
-    fMap[r.faculty].req+=r.req; fMap[r.faculty].done+=r.done; fMap[r.faculty].projects.add(r.project);
-  });
+  const fMap=buildFacMap();
   const fNames=Object.keys(fMap).sort((a,b)=>fMap[b].req-fMap[a].req);
-  const tFReq=rows.reduce((s,r)=>s+r.req,0), tFDon=rows.reduce((s,r)=>s+r.done,0);
+  const tFReq=rows.reduce((s,r)=>s+r.req,0),tFDon=rows.reduce((s,r)=>s+r.done,0);
   const fPct=tFReq>0?Math.round(tFDon/tFReq*100):0;
   const projs=[...new Set(rows.map(r=>r.project).filter(Boolean))];
 
@@ -1135,32 +1163,45 @@ function buildFaculty() {
   popSel('s2-proj',projs.sort());
   popSel('s2-subj',[...new Set(rows.map(r=>r.subject).filter(Boolean))].sort());
 
+  // Populate faculty month dropdown
+  const facDDL=document.getElementById('fac-month-ddl');
+  if(facDDL){
+    while(facDDL.options.length>1) facDDL.remove(1);
+    monthCols.forEach(mc=>facDDL.add(new Option(mc.label,mc.label)));
+    // Auto-set to current month
+    if(activeMonth) facDDL.value=activeMonth;
+  }
+
+  // Faculty monthly leaderboard
+  renderFacMonthlyBoard(activeMonth||'');
+
+  // Charts
   mkChart('fb','fc-bar','bar',{labels:fNames,datasets:[
     {label:'Assigned',data:fNames.map(f=>fMap[f].req),backgroundColor:'rgba(79,142,247,.5)',borderColor:'rgba(79,142,247,.7)',borderWidth:1,borderRadius:3,borderSkipped:false},
     {label:'Completed',data:fNames.map(f=>fMap[f].done),backgroundColor:'rgba(34,214,114,.5)',borderColor:'rgba(34,214,114,.7)',borderWidth:1,borderRadius:3,borderSkipped:false}
-  ]},{...BASE,scales:SCALES});
+  ]},{...BASE,scales:SC});
 
   const fPcts=fNames.map(f=>fMap[f].req>0?Math.round(fMap[f].done/fMap[f].req*100):0);
   mkChart('fpct','fc-pct','bar',{labels:fNames,datasets:[{label:'% Done',data:fPcts,backgroundColor:fPcts.map(pctBg),borderRadius:4,borderSkipped:false}]},
-    {...BASE,indexAxis:'y',plugins:{...BASE.plugins,legend:{display:false}},scales:{x:{...SCALES.x,max:100,ticks:{...SCALES.x.ticks,callback:v=>v+'%'}},y:SCALES.y}});
+    {...BASE,indexAxis:'y',plugins:{...BASE.plugins,legend:{display:false}},scales:{x:{...SC.x,max:100,ticks:{...SC.x.ticks,callback:v=>v+'%'}},y:SC.y}});
 
   const pMap={};
-  rows.forEach(r=>{if(!pMap[r.project]) pMap[r.project]={req:0,done:0}; pMap[r.project].req+=r.req; pMap[r.project].done+=r.done;});
+  rows.forEach(r=>{ if(!pMap[r.project]) pMap[r.project]={req:0,done:0}; pMap[r.project].req+=r.req; pMap[r.project].done+=r.done; });
   const pK=Object.keys(pMap).sort();
   mkChart('fproj','fc-proj','bar',{labels:pK,datasets:[
     {label:'Assigned',data:pK.map(k=>pMap[k].req),backgroundColor:'rgba(155,109,255,.5)',borderColor:'rgba(155,109,255,.7)',borderWidth:1,borderRadius:3,borderSkipped:false},
     {label:'Completed',data:pK.map(k=>pMap[k].done),backgroundColor:'rgba(34,214,114,.5)',borderColor:'rgba(34,214,114,.7)',borderWidth:1,borderRadius:3,borderSkipped:false}
-  ]},{...BASE,scales:SCALES});
+  ]},{...BASE,scales:SC});
 
   mkChart('fdnt','fc-donut','doughnut',{labels:fNames,datasets:[{data:fNames.map(f=>fMap[f].req),backgroundColor:C,borderWidth:0,hoverOffset:10}]},
     {...BASE,cutout:'62%',plugins:{...BASE.plugins,legend:{position:'bottom',labels:{color:'#4a5270',font:{size:9,family:'DM Mono'},boxWidth:8,padding:8}}}});
 
+  // Faculty cards
   const grid=document.getElementById('fac-cards'); grid.innerHTML='';
   fNames.forEach((name,idx)=>{
     const fm=fMap[name],p=fm.req>0?Math.round(fm.done/fm.req*100):0,clr=pctColor(p);
-    const accentClr=C[idx%C.length];
+    const ac=C[idx%C.length];
     const d=document.createElement('div'); d.className='fac-card';
-    d.style.borderTopColor=accentClr+'33';
     d.innerHTML=`
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px">
         <div class="fac-name">${name}</div>
@@ -1172,14 +1213,14 @@ function buildFaculty() {
         <div class="fac-num"><div class="fac-nv" style="color:var(--accent)">${fm.done}</div><div class="fac-nl">Done</div></div>
         <div class="fac-num"><div class="fac-nv" style="color:${clr}">${fm.req-fm.done}</div><div class="fac-nl">Left</div></div>
       </div>
-      <div class="prog-track" style="height:3px;margin-bottom:0"><div class="prog-fill" style="width:${p}%;background:linear-gradient(90deg,${accentClr}88,${clr});"></div></div>`;
+      <div class="prog-track" style="height:3px"><div class="prog-fill" style="width:${p}%;background:linear-gradient(90deg,${ac}88,${clr})"></div></div>`;
     grid.appendChild(d);
   });
   renderT2();
 }
 
-// ── TABLE 1 ───────────────────────────────────────────────
-function sortT1(col) {
+// ── TABLE 1 ────────────────────────────────────────────
+function sortT1(col){
   sa1=sc1===col?!sa1:true; sc1=col;
   document.querySelectorAll('#tab-overview thead th').forEach((th,i)=>{
     th.classList.toggle('sorted',i===col);
@@ -1187,14 +1228,13 @@ function sortT1(col) {
   });
   renderT1();
 }
-function renderT1() {
+function renderT1(){
   const fP=(document.getElementById('s1-proj')||{}).value||'';
   const fS=(document.getElementById('s1-subj')||{}).value||'';
   const fSt=(document.getElementById('s1-stat')||{}).value||'';
   const sq=((document.getElementById('s1-search')||{}).value||'').toLowerCase();
   let data=s1Rows.filter(r=>{
-    if(fP&&r.project!==fP) return false;
-    if(fS&&r.subject!==fS) return false;
+    if(fP&&r.project!==fP) return false; if(fS&&r.subject!==fS) return false;
     if(fSt&&r.status!==fSt) return false;
     if(sq&&!(r.project+r.subject+r.status).toLowerCase().includes(sq)) return false;
     return true;
@@ -1220,15 +1260,14 @@ function renderT1() {
   const rc=document.getElementById('rc1'); if(rc) rc.textContent=`${data.length} of ${s1Rows.length} records`;
 }
 
-// ── TABLE 2 ───────────────────────────────────────────────
-function sortT2(col) { sa2=sc2===col?!sa2:true; sc2=col; renderT2(); }
-function renderT2() {
+// ── TABLE 2 ────────────────────────────────────────────
+function sortT2(col){ sa2=sc2===col?!sa2:true; sc2=col; renderT2(); }
+function renderT2(){
   const fP=(document.getElementById('s2-proj')||{}).value||'';
   const fS=(document.getElementById('s2-subj')||{}).value||'';
   const sq=((document.getElementById('s2-search')||{}).value||'').toLowerCase();
   let data=facRows.filter(r=>{
-    if(fP&&r.project!==fP) return false;
-    if(fS&&r.subject!==fS) return false;
+    if(fP&&r.project!==fP) return false; if(fS&&r.subject!==fS) return false;
     if(sq&&!(r.faculty+r.project+r.subject).toLowerCase().includes(sq)) return false;
     return true;
   });
@@ -1253,146 +1292,89 @@ function renderT2() {
   const rc=document.getElementById('rc2'); if(rc) rc.textContent=`${data.length} of ${facRows.length} records`;
 }
 
-// ── EXPORT HELPERS ────────────────────────────────────────
-function toggleExportMenu() {
-  document.getElementById('exportWrap').classList.toggle('open');
-}
-document.addEventListener('click', e => {
-  if(!e.target.closest('#exportWrap')) document.getElementById('exportWrap').classList.remove('open');
-});
+// ── EXPORT ─────────────────────────────────────────────
+function toggleExportMenu(){ document.getElementById('exportWrap').classList.toggle('open'); }
+document.addEventListener('click',e=>{ if(!e.target.closest('#exportWrap')) document.getElementById('exportWrap').classList.remove('open'); });
 
-function showToast(msg) {
+function showToast(msg){
   document.getElementById('toast-msg').textContent=msg;
-  const t=document.getElementById('export-toast');
-  t.classList.add('show');
+  const t=document.getElementById('export-toast'); t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),3000);
 }
 
-function tableToCSV(tableEl) {
-  const rows=[];
-  const headers=[];
+function tableToCSV(tableEl){
+  const rows=[]; const headers=[];
   tableEl.querySelectorAll('thead th').forEach(th=>headers.push(th.innerText.replace(/[↕↑↓]/g,'').trim()));
   rows.push(headers.join(','));
   tableEl.querySelectorAll('tbody tr').forEach(tr=>{
     const cells=[];
     tr.querySelectorAll('td').forEach(td=>{
-      // Skip progress bar cells, get text
-      const badge=td.querySelector('.badge');
-      const mp=td.querySelector('.mp-lbl');
-      let val='';
-      if(badge) val=badge.innerText.trim();
-      else if(mp) val=mp.innerText.trim();
-      else val=td.innerText.trim();
-      cells.push(`"${val.replace(/"/g,'""')}"`);
+      const b=td.querySelector('.badge'),m=td.querySelector('.mp-lbl');
+      let v=b?b.innerText.trim():m?m.innerText.trim():td.innerText.trim();
+      cells.push(`"${v.replace(/"/g,'""')}"`);
     });
-    if(cells.length>0) rows.push(cells.join(','));
+    if(cells.length) rows.push(cells.join(','));
   });
   return rows.join('\n');
 }
 
-function downloadCSV(csv, filename) {
+function downloadCSV(csv,filename){
   const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a'); a.href=url; a.download=filename;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+  const url=URL.createObjectURL(blob); const a=document.createElement('a');
+  a.href=url; a.download=filename; document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 
-function exportCSV() {
+function exportCSV(){
   document.getElementById('exportWrap').classList.remove('open');
-  let tbl, filename;
-  if(currentTab==='overview'){
-    tbl=document.querySelector('#tab-overview table');
-    filename=`vs-tracker-overview-${new Date().toISOString().slice(0,10)}.csv`;
-  } else if(currentTab==='monthly'){
-    tbl=document.querySelector('#tab-monthly table');
-    filename=`vs-tracker-monthly${activeMonth?'-'+activeMonth:''}-${new Date().toISOString().slice(0,10)}.csv`;
-  } else {
-    tbl=document.querySelector('#tab-faculty table');
-    filename=`vs-tracker-faculty-${new Date().toISOString().slice(0,10)}.csv`;
-  }
-  if(!tbl){showToast('No table data to export'); return;}
-  downloadCSV(tableToCSV(tbl), filename);
-  showToast('CSV exported successfully');
+  let tbl,name;
+  if(currentTab==='overview'){tbl=document.querySelector('#tab-overview table');name=`vs-overview-${new Date().toISOString().slice(0,10)}.csv`;}
+  else if(currentTab==='monthly'){tbl=document.querySelector('#tab-monthly table');name=`vs-monthly${activeMonth?'-'+activeMonth:''}-${new Date().toISOString().slice(0,10)}.csv`;}
+  else{tbl=document.querySelector('#tab-faculty table');name=`vs-faculty-${new Date().toISOString().slice(0,10)}.csv`;}
+  if(!tbl){showToast('No table data'); return;}
+  downloadCSV(tableToCSV(tbl),name); showToast('CSV exported');
 }
 
-function exportAllCSV() {
+function exportAllCSV(){
   document.getElementById('exportWrap').classList.remove('open');
-  // Overview data
-  const rows1=[['Project','Subject','Status','Required','Completed','%Done']];
-  s1Rows.forEach(r=>{
-    const p=r.req>0?Math.round(r.done/r.req*100):0;
-    rows1.push([r.project,r.subject,r.status,r.req,r.done,p+'%']);
-  });
-  // Monthly data
-  const mHeader=['Project','Subject',...monthCols.map(m=>m.label)];
-  const rows2=[mHeader];
-  s1Rows.forEach(r=>{
-    rows2.push([r.project,r.subject,...monthCols.map(mc=>r.months[mc.label]||0)]);
-  });
-  // Faculty data
-  const rows3=[['Faculty','Project','Subject','Assigned','Completed','%Done']];
-  facRows.forEach(r=>{
-    const p=r.req>0?Math.round(r.done/r.req*100):0;
-    rows3.push([r.faculty,r.project,r.subject,r.req,r.done,p+'%']);
-  });
-
-  const csvAll=[
-    '=== OVERVIEW ===','',
-    ...rows1.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')),
-    '','=== MONTHLY ===','',
-    ...rows2.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')),
-    '','=== FACULTY ===','',
-    ...rows3.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))
+  const r1=[['Project','Subject','Status','Required','Completed','%Done']];
+  s1Rows.forEach(r=>{ const p=r.req>0?Math.round(r.done/r.req*100):0; r1.push([r.project,r.subject,r.status,r.req,r.done,p+'%']); });
+  const r2=[['Project','Subject',...monthCols.map(m=>m.label)]];
+  s1Rows.forEach(r=>r2.push([r.project,r.subject,...monthCols.map(mc=>r.months[mc.label]||0)]));
+  const r3=[['Faculty','Project','Subject','Assigned','Completed','%Done']];
+  facRows.forEach(r=>{ const p=r.req>0?Math.round(r.done/r.req*100):0; r3.push([r.faculty,r.project,r.subject,r.req,r.done,p+'%']); });
+  const csv=[
+    '=== OVERVIEW ===','',...r1.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')),
+    '','=== MONTHLY ===','',...r2.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')),
+    '','=== FACULTY ===','',...r3.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','))
   ].join('\n');
-
-  downloadCSV(csvAll, `vs-tracker-full-export-${new Date().toISOString().slice(0,10)}.csv`);
-  showToast('Full data CSV exported');
+  downloadCSV(csv,`vs-full-export-${new Date().toISOString().slice(0,10)}.csv`); showToast('Full CSV exported');
 }
 
-async function exportPDF() {
+async function exportPDF(){
   document.getElementById('exportWrap').classList.remove('open');
   showToast('Generating PDF…');
   const panel=document.getElementById('tab-'+currentTab);
-  try {
-    const canvas=await html2canvas(panel,{
-      backgroundColor:'#07090f', scale:1.5, useCORS:true,
-      ignoreElements:el=>el.id==='export-toast'
-    });
+  try{
+    const canvas=await html2canvas(panel,{backgroundColor:'#07090f',scale:1.5,useCORS:true,ignoreElements:el=>el.id==='export-toast'});
     const {jsPDF}=window.jspdf;
     const pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
-    const pW=pdf.internal.pageSize.getWidth();
-    const pH=pdf.internal.pageSize.getHeight();
-    const iW=canvas.width/1.5;
-    const iH=canvas.height/1.5;
-    const ratio=Math.min(pW/iW, pH/iH);
-    const finalW=iW*ratio, finalH=iH*ratio;
-    const imgData=canvas.toDataURL('image/jpeg',0.92);
-    // Multi-page if content is tall
-    const pageH=iW/pW*pH;
-    let yOffset=0;
+    const pW=pdf.internal.pageSize.getWidth(), pH=pdf.internal.pageSize.getHeight();
+    const iW=canvas.width/1.5, iH=canvas.height/1.5;
+    const pageH=iW/pW*pH; let yOffset=0;
     while(yOffset<iH){
       if(yOffset>0) pdf.addPage();
-      const srcY=yOffset;
       const srcH=Math.min(pageH,iH-yOffset);
-      const tmpCanvas=document.createElement('canvas');
-      tmpCanvas.width=iW; tmpCanvas.height=srcH;
-      const ctx=tmpCanvas.getContext('2d');
-      ctx.drawImage(canvas,0,srcY*1.5,iW*1.5,srcH*1.5,0,0,iW,srcH);
-      const pageImg=tmpCanvas.toDataURL('image/jpeg',0.92);
-      const pageImgH=(srcH/iW)*pW;
-      pdf.addImage(pageImg,'JPEG',0,0,pW,pageImgH);
+      const tmp=document.createElement('canvas'); tmp.width=iW; tmp.height=srcH;
+      tmp.getContext('2d').drawImage(canvas,0,yOffset*1.5,iW*1.5,srcH*1.5,0,0,iW,srcH);
+      pdf.addImage(tmp.toDataURL('image/jpeg',.92),'JPEG',0,0,pW,(srcH/iW)*pW);
       yOffset+=pageH;
     }
-    pdf.save(`vs-tracker-${currentTab}-${new Date().toISOString().slice(0,10)}.pdf`);
-    showToast('PDF exported successfully');
-  } catch(e){
-    showToast('PDF export failed: '+e.message);
-    console.error(e);
-  }
+    pdf.save(`vs-${currentTab}-${new Date().toISOString().slice(0,10)}.pdf`); showToast('PDF exported');
+  }catch(e){ showToast('PDF failed: '+e.message); }
 }
 
-// ── INIT ──────────────────────────────────────────────────
+// ── INIT ───────────────────────────────────────────────
 loadAll();
 setInterval(loadAll,60000);
 </script>
